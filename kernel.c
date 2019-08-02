@@ -148,6 +148,8 @@ int mutex_create(mutex_pt* mutex)
 {
 	mutex->flag = 0; // mutex »ı¼º
 	mutex->owner = 0;
+	mutex->lock_counter = 0;
+	mutex->tra_flag = 0;
 
 	return 1;
 }
