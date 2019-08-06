@@ -9,9 +9,9 @@
 #include <stdlib.h>
 //#include "readyQ.h"
 
-unsigned char buf1[25];
-unsigned char buf2[25];
-msgq_pt* _g_msgq;
+//unsigned char buf1[25];
+//unsigned char buf2[25];
+msgq_pt _g_msgq;
 int mess_flag[NUM_OF_TASKS];
 int RR();
 
@@ -41,9 +41,10 @@ int l = 0;
 }
 
 int num = 0;
-unsigned char buf[25] = "hello world\n\n";
+//unsigned char buf[25] = "hello world\n\n";
 void TASK(1) //Adding
 {
+	unsigned char buf[25] = "hello world \n\n";
 	jump_1();
 L_1_0:
 
@@ -66,7 +67,7 @@ L_1_1:
 		printf("task1 has produced one\n\n");
 		//printf("task3 sem_data: %d\n\n", sem[0]
 			//.counter);
-		mess_flag[1] = msgq_send(_g_msgq, buf);
+		mess_flag[1] = msgq_send(&_g_msgq, buf);
 		if (mess_flag[1])
 			return;
 
@@ -111,7 +112,7 @@ L_1_5:
 
 void TASK(2)
 {
-	//unsigned char buf[25];
+	unsigned char buf[25];
 	jump_2();
 L_2_0:
 
@@ -120,8 +121,8 @@ L_2_0:
 		j++;
 		//printf("i am task2");
 		//printf("task2 sem_data: %d\n\n", sem[0].counter);
-		mess_flag[2] = msgq_receive(_g_msgq, buf1);
-				printf("task2, mess is %s\n\n", buf1);
+		mess_flag[2] = msgq_receive(&_g_msgq, buf);
+				//printf("task2, mess is %s\n\n", buf);
 		current_pc[2] = 1;
 		//printf("task2 sem_data: %d\n\n", sem[0].counter);
 		if (mess_flag[2])
@@ -130,7 +131,7 @@ L_2_0:
 
 	L_2_1:
 		printf("task2 counsumes one\n\n");
-		//printf("mess is %s\n\n", buf1);
+		printf("mess is %s\n\n", buf);
 	}
 L_2_2:
 	current_pc[2] = 0;
@@ -160,7 +161,7 @@ L_2_3:
 
 void TASK(3)
 {
-	//unsigned char buf[25] = { 0 };
+	unsigned char buf[25];
 	jump_3();
 L_3_0:
 	current_pc[3] = 1;
@@ -168,8 +169,8 @@ L_3_0:
 	{
 		l++;
 		//printf("task3 sem_data: %d\n\n", sem[0].counter);
-		mess_flag[3] = msgq_receive(_g_msgq, buf2); 
-		printf("task3 ,mess is %s\n\n", buf2);
+		mess_flag[3] = msgq_receive(&_g_msgq, buf); 
+		printf("task3 ,mess is %s\n\n", buf);
 		//printf("task3 sem_data: %d\n\n", sem[0].counter);
 		if (mess_flag[3])
 			return;
@@ -195,20 +196,18 @@ L_3_3:
 
 void main()
 {
-	_g_msgq = (msgq_pt*)malloc(sizeof(msgq_pt));
 
-	msgq_create(_g_msgq, 25, 0);
+
+	msgq_create(&_g_msgq, 25, 0);
 
 	task_create(1);
 	task_create(2);
 	task_create(3);
 
 	ubik_comp_start();
+	msgq_delete(&_g_msgq);
 
-	//assert(num == 0);
-	//system("pause");
-
-	free(_g_msgq);
+	
 }
 
 void running()

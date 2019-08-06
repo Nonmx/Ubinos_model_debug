@@ -59,7 +59,7 @@
     <ClCompile Include="waitingQ.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="mutex_test2.c">
+    <ClCompile Include="mutex_test1.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

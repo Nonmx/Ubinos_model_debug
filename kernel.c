@@ -144,12 +144,22 @@ int time_checker(unsigned char tid)//Wake up the task
 }
 
 
+void mutex_mem_alloc(mutex_pt* mutex)
+{
+	mutex = (mutex_pt*)malloc(sizeof(mutex_pt));
+}
+
 int mutex_create(mutex_pt* mutex)
 {
+	
+	mutex_mem_alloc(mutex);
 	mutex->flag = 0; // mutex 생성
 	mutex->owner = 0;
-
+	mutex->lock_counter = 0;
+	mutex->tra_flag = 0;
+	
 	return 1;
+	
 }
 
 unsigned char Before_temp;
@@ -168,12 +178,12 @@ int mutex_lock(mutex_pt* mutex)
 		mutex->lock_counter = 1;
 		//mutex[0].call[current_tid]++;
 
-		return 1;
+		return 2;//no scheduling
 	}
 	else if (mutex->lock_counter >= 1 && mutex->owner == current_tid)// mutex 여려번 잠금할 수 있다.
 	{
 		mutex->lock_counter++;
-		return 1;
+		return 2;//no scheduling
 	}
 	else
 	{
@@ -235,8 +245,6 @@ int mutex_unlock(mutex_pt* mutex)
 		if (is_sleeping() && mutex->lock_call[temp_tid] > 0) // 지금 waitQ에서(block) task가 있으면 그리고 해당task 이미 mutex_lock 호출하면 
 		{
 			//block된 task 수행될 때 mutex 가지고 있는 상태로 resume
-
-
 			task_state[temp_tid] = Ready;
 			mutex->flag = 1;
 			mutex->owner = temp_tid;
@@ -246,17 +254,15 @@ int mutex_unlock(mutex_pt* mutex)
 
 		}
 
-		return 1;
+		return 2;//non scheduling
 	}
 	else if (mutex->lock_counter > 1)
 	{
 		mutex->lock_counter--;
-		return 1;
+		return 2;//no schuedling
 	}
 	else
-	{
-		return 0;
-	}
+		return -1;
 }
 
 int mutex_islocked(mutex_pt* mutex)
@@ -270,28 +276,41 @@ int mutex_islocked(mutex_pt* mutex)
 int mutex_delete(mutex_pt* mutex)
 {
 	mutex->flag = -1;
+	mutex->lock_counter = -1;
+	mutex->tra_flag = -1;
+	mutex->owner = -1;
+
+	mutex = NULL;
+	free(mutex);
+
 	return 1;
+
 }
 
 
 
 
-int mutex_time_checker(mutex_pt* mutex, unsigned char tid)//
+int mutex_time_checker(mutex_pt* mutex, unsigned char tid)// 확인하고 수정
 {
-
-	if (mutex->lock_call[tid] == 99 && mutex->flag == 0 && mutex->owner == 0)
+	if (task_state[tid] == Blocked && mutex->lock_call[tid]== tid)
 	{
-		mutex->flag = 1;
-		mutex->owner = tid;
-		mutex->lock_counter = 1;
-		return 1;
+		int loc;
+		for (loc = Front[task_dyn_info[tid].dyn_prio]; loc < Rear[task_dyn_info[tid].dyn_prio]; loc++)
+		{
+			get_task_from_WQ(&temp_tid, &temp_prio);
+			if (temp_tid == tid)
+			{
+				task_state[temp_tid] = Ready;
+				push_task_into_readyQ(temp_tid, temp_prio, current_pc[temp_tid], PREEMPT);
+				return 1;
+			}
+			else
+			{
+				push_task_into_WQ(temp_tid, temp_prio);
+			}
+		}
 	}
-	else if (mutex->lock_call[tid] == 99 && mutex->flag >= 1 && mutex->owner == tid)
-	{
-		mutex->lock_counter++;
-		return 1;
-	}
-	else if (mutex->lock_call[tid] == 99 && !(mutex->owner == tid))
+	else
 	{
 		return 0;
 	}
@@ -300,29 +319,86 @@ int mutex_time_checker(mutex_pt* mutex, unsigned char tid)//
 
 int mutex_lock_timed(mutex_pt* mutex, unsigned int time)
 {
-	mutex->lock_call[current_tid] = 99;
+	mutex->lock_call[current_tid] = current_tid;
 
-	return 1;
+	if (mutex->flag == 0 && mutex->owner == 0)//first time 
+	{
+		mutex->flag = 1;
+		mutex->owner = current_tid;
+		mutex->lock_counter = 1;
+		//mutex[0].call[current_tid]++;
+
+		return 2;//no scheduling
+	}
+	else if (mutex->lock_counter >= 1 && mutex->owner == current_tid)// mutex 여려번 잠금할 수 있다.
+	{
+		mutex->lock_counter++;
+		return 2;//no scheduling
+	}
+	else
+	{
+		if (task_static_info[mutex->owner].prio < task_static_info[current_tid].prio)
+		{
+			mutex->tra_flag = 1;
+			After_temp = current_prio;
+			Before_temp = task_static_info[mutex->owner].prio; // unlock
+
+			task_state[current_tid] = Blocked;
+			push_task_into_WQ(current_tid, current_prio); // 수행중인 task가 lock 될 수 없으면 waitQ로 push 한다
+			int loc = 0;
+			for (loc = front[task_dyn_info[mutex->owner].dyn_prio]; loc < rear[task_dyn_info[mutex->owner].dyn_prio]; loc++)
+			{
+				//mutex 가지고 있는 task 꺼낼 때 까지 
+				get_task_from_readyQ_position(&temp_tid, &temp_prio, mutex);
+				if (temp_tid == mutex->owner)
+				{
+					task_dyn_info[temp_tid].dyn_prio = After_temp; // priorit inherit
+					push_task_into_readyQ(temp_tid, task_dyn_info[temp_tid].dyn_prio, current_pc[temp_tid], PREEMPT); // mutex가지고 있는 낮은 priority인 task가 먼저 readyQ에서 꺼내서 priority 상속한 다음에 readyQ로 다시 push 한다
+					break;
+				}
+				else
+				{
+					push_task_into_readyQ(temp_tid, task_dyn_info[temp_tid].dyn_prio, current_pc[temp_tid], PREEMPT);
+				}
+			}
+			return reschedule(API_mutex_lock, current_tid);
+
+
+		}
+		else
+		{
+			task_state[current_tid] = Blocked;
+			push_task_into_WQ(current_tid, current_prio);
+			return reschedule(API_mutex_lock, current_prio);
+		}
+	}
 }
 
 
-
+void sem_mem_alloc(sem_pt* sem)
+{
+	sem = (sem_pt*)malloc(sizeof(sem_pt));
+}
 
 int sem_create(sem_pt* sem)
 {
+	sem_mem_alloc(sem);
 	sem->counter = 0;
 	return 1;
 }
 
+
 int sem_delete(sem_pt* sem)
 {
 	sem->counter = -1;
+	sem = NULL;
+	free(sem);
 	return 1;
 }
 
 int sem_give(sem_pt* sem)
 {
-	if (!(empty()))
+	if (!(empty()) && sem->counter == 0)
 	{
 		get_task_from_WQ(&temp_tid, &temp_prio);
 		push_task_into_readyQ(temp_tid, temp_prio, current_pc[temp_tid], PREEMPT);
@@ -330,11 +406,12 @@ int sem_give(sem_pt* sem)
 		//	return 1;// 높은 priority task 있으면 바로 수행
 	//	else return 0;//높은 priority 없으면 Round robin 발생가능성이 있다.
 	}
-	else
+	else if(sem->counter == 0)
 	{
 		sem->counter = sem->counter + 1;
-		return 1;
+		return 2;//no scheduling
 	}
+	else return -1;
 }
 
 
@@ -343,7 +420,7 @@ int sem_take(sem_pt* sem)
 	if (sem->counter > 0)
 	{
 		sem->counter = sem->counter - 1;
-		return 1;
+		return 2;//no scheduling
 
 	}
 	else
@@ -355,35 +432,64 @@ int sem_take(sem_pt* sem)
 
 int sem_take_timed(sem_pt* sem, unsigned int timed)
 {
-	sem->lock_call[current_tid] = 99; // 어느 태스크가 sem_task_time API 호출하는지 기록
-}
+	sem->lock_call[current_tid] = current_tid; // 어느 태스크가 sem_task_time API 호출하는지 기록
 
-int sem_time_checker(sem_pt* sem, unsigned char tid)
-{
-	if (sem->lock_call[tid] == 99)
+	if (sem->counter > 0)
 	{
-		if (sem->counter > 0)
-		{
-			sem->counter = sem->counter - 1;
-			return 1;
-		}
-		else
-		{
-			push_task_into_WQ(tid, task_dyn_info[tid].dyn_prio);
-			return (reschedule(API_sem_take, tid));
-		}
+		sem->counter = sem->counter - 1;
+		return 2;//no scheduling
+
+	}
+	else
+	{
+		push_task_into_WQ(current_tid, current_prio);
+		return(reschedule(API_sem_take, current_tid));
 	}
 }
 
 
+int sem_time_checker(sem_pt* sem, unsigned char tid)//확인하고 수정
+{
+	if (task_state[tid] == Blocked && sem->lock_call[tid] == tid)
+	{
+		int loc;
+		for (loc = Front[task_dyn_info[tid].dyn_prio]; loc < Rear[task_dyn_info[tid].dyn_prio]; loc++)
+		{
+			get_task_from_WQ(&temp_tid, &temp_prio);
+			if (temp_tid == tid)
+			{
+				task_state[temp_tid] = Ready;
+				push_task_into_readyQ(temp_tid, temp_prio, current_pc[temp_tid], PREEMPT);
+				return 1;
+			}
+			else
+			{
+				push_task_into_WQ(temp_tid, temp_prio);
+			}
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+
+
 //message Q
+
+void msgq_mem_alloc(msgq_pt* msgq_p) {
+	msgq_p = (msgq_pt*)malloc(sizeof(msgq_pt));
+
+}
+
 int msgq_create(msgq_pt* msgq_p, unsigned int msgsize, unsigned int maxcount) //for noting
 {
 	//message static적으로 구현
+	msgq_mem_alloc(msgq_p);
 	msgq_p->flag = 1; //created scuessful
 	return 1;
 }
-
 
 
 int msgq_send(msgq_pt* msgq_p, unsigned char* message)
@@ -397,10 +503,10 @@ int msgq_send(msgq_pt* msgq_p, unsigned char* message)
 	else if (msgq_p->flag == 1)
 	{
 		push_message_into_MQ(msgq_p, message);
-		return 1;
+		return 2;//no scheduling
 
 	}
-	else return 0;
+	else return -1;//msgq create하지 않는다.
 }
 
 int msgq_receive(msgq_pt* msgq_p, unsigned char* message)
@@ -408,14 +514,23 @@ int msgq_receive(msgq_pt* msgq_p, unsigned char* message)
 	if (!(MQ_empty()) && msgq_p->flag == 1)
 	{
 		get_message_from_MQ(msgq_p, message);
-		return 1;
+		return 2;//no schuedling
 	}
 	else if (msgq_p->flag == 1)
 	{
 		push_task_into_WQ(current_tid, current_prio);
 		return(reschedule(API_msgq_receive, current_tid));
 	}
-	else return 0;
+	else return -1;//msgq create하지 않는다
+}
+
+int msgq_delete(msgq_pt* msgq_p)
+{
+	msgq_p->flag = -1;
+	msgq_p = NULL;
+	free(msgq_p);
+	
+	return 1;
 }
 
 int os_on;

@@ -137,7 +137,7 @@
     <ClCompile Include="kernel.c" />
     <ClCompile Include="messageQ.c" />
     <ClCompile Include="model.c" />
-    <ClCompile Include="mutex_test2.c" />
+    <ClCompile Include="mutex_test1.c" />
     <ClCompile Include="readyQ.c" />
     <ClCompile Include="waitingQ.c" />
   </ItemGroup>

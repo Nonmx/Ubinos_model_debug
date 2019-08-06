@@ -12,7 +12,7 @@ Test on basic functions of mutex
 int task_counter[NUM_OF_TASKS];
 int flag;
 
-mutex_pt *mutex;
+mutex_pt mutex;
 
 
 #define JUMP_1(){\
@@ -38,13 +38,13 @@ void TASK(1)
 L_1_0:
 	printf("task1 locking mutex\n\n");
 	current_pc[1]++;
-	flag = mutex_lock(mutex);
+	flag = mutex_lock(&mutex);
 	if (flag)
 		return;
 L_1_1:
 	printf("task1 ublocking mutex\n");
 	current_pc[1]++;
-	flag = mutex_unlock(mutex);
+	flag = mutex_unlock(&mutex);
 	if (flag)
 		return;
 L_1_2:
@@ -56,7 +56,7 @@ L_1_2:
 L_1_3:
 	printf("time1 try locking mutex after 1000 sec\n\n");
 	current_pc[1]++;
-	flag = mutex_lock_timed(mutex, 1000);
+	//flag = mutex_lock_timed(&mutex, 1000);
 	if (flag)
 		return;
 L_1_4:
@@ -97,7 +97,7 @@ void TASK(2)
 L_2_0:
 	printf("task2 locking mutex\n\n");
 	current_pc[2]++;
-	flag = mutex_lock(mutex);
+	flag = mutex_lock(&mutex);
 	if (flag)
 		return;
 L_2_1:
@@ -109,31 +109,31 @@ L_2_1:
 L_2_2:
 	printf("task2 locking mutex one more time\n\n");
 	current_pc[2]++;
-	flag = mutex_lock(mutex);
+	flag = mutex_lock(&mutex);
 	if (flag)
 		return;
 L_2_3:
 	printf("task2 unlocking mutex\n\n.");
 	current_pc[2]++;
-	flag = mutex_unlock(mutex);
+	flag = mutex_unlock(&mutex);
 	if (flag)
 		return;
 L_2_4:
 	printf("task2 unlock mutex one more time\n\n.");
 	current_pc[2]++;
-	flag = mutex_unlock(mutex);
+	flag = mutex_unlock(&mutex);
 	if (flag)
 		return;
 L_2_5:
 	printf("task2 lockint mutex\n\n");
 	current_pc[2]++;
-	flag = mutex_lock(mutex);
+	flag = mutex_lock(&mutex);
 	if (flag)
 		return;
 L_2_6:
 	printf("task2 unblocking mutex \n\n");
 	current_pc[2]++;
-	flag = mutex_unlock(mutex);
+	flag = mutex_unlock(&mutex);
 	if (flag)
 		return;
 L_2_7:
@@ -149,16 +149,16 @@ L_2_7:
 
 void main()
 {
-	mutex = (mutex_pt*)malloc(sizeof(mutex_pt));
+	//mutex = (mutex_pt*)malloc(sizeof(mutex_pt));
 
-	mutex_create(mutex);
+	mutex_create(&mutex);
 
 	printf("create task2.\n\n");
 	task_create(2);
 	ubik_comp_start();
 
-	mutex_delete(mutex);
-	free(mutex);
+	mutex_delete(&mutex);
+	//free(mutex);
 }
 
 int mutex_checker;
@@ -185,7 +185,7 @@ void running()
 		}
 		else if (mutex_checker == 11)
 		{
-			mutex_time_checker(mutex, 1);
+			//mutex_time_checker(&mutex, 1);
 			mutex_checker = 0;
 			sleep_checker = 0;
 		}
