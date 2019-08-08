@@ -45,7 +45,17 @@ typedef enum API {
 	API_sem_give,
 	API_mutex_unlock
 }API;
+
+typedef enum
+{
+	Mutex,
+	Sem,
+	Msgq
+}OWNER; //waitQ에서 있는 task는 mutex || sem || msgq관련된 API push하는지 check
+
+
 extern API api;
+extern API api_suporter;
 
 typedef enum Mess {
 	PB_KEY_CHANGE_EVT,
@@ -89,10 +99,12 @@ typedef struct {
 
 typedef struct {
 	int flag;// -1 = mutex 없다, 0 = unlocked, 1 = locked
-	unsigned char owner;//locked 가지고 있는  task
-	unsigned int lock_counter;
+	char owner;//locked 가지고 있는  task
+	int lock_counter;
 	int lock_call[NUM_OF_TASKS];
-	unsigned int tra_flag;
+	int tra_flag;
+	int signal;
+	int block_flag;
 }mutex_pt;
 
 

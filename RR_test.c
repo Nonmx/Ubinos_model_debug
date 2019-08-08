@@ -9,9 +9,6 @@ round robin 식으로 수행하는 test case입니다.
 #include "assert.h"
 //#include "readyQ.h"
 
-extern int Round_Robin_Schedule();
-
-
 //int RR();
 
 void LED_1();
@@ -47,18 +44,19 @@ L_1_0:
 	current_pc[1] = 0;
 	LED_1();
 	current_pc[1]++;
-	flag = Round_Robin_Schedule();
-	if (flag) return;
+	flag = scheduler();
+	if (flag!=-1) return;
 L_1_1:
 	LED_1();
-	flag = Round_Robin_Schedule();
+	flag = scheduler();
 	current_pc[1]++;
-	if (flag) return;
+	if (flag!=-1) return;
 L_1_2:
 	printf("task1 terminate\n");
 	current_pc[1] = 0;
-	flag = TerminateTask();
-	if (flag)
+	if (TerminateTask())
+		flag = scheduler();
+	if (flag!=-1)
 		return;
 L_1_3:
 	;
@@ -86,28 +84,29 @@ void TASK(2)
 L_2_0:
 	current_pc[2] = 0;
 	LED_2();
-	flag = Round_Robin_Schedule();
+	flag = scheduler();
 	current_pc[2]++;
-	if (flag) return;
+	if (flag!=-1) return;
 
 L_2_1:
 
 	LED_2();
-	flag = Round_Robin_Schedule();
+	flag = scheduler();
 	current_pc[2]++;
-	if (flag)
+	if (flag!=-1)
 		return;
 L_2_2:
 	LED_2();
-	flag = Round_Robin_Schedule();
+	flag = scheduler();
 	current_pc[2] ++;
-	if (flag)
+	if (flag!=-1)
 		return;
 L_2_3:
 	printf("task2 terminate\n");
 	current_pc[2] = 0;
-	flag = TerminateTask();
-	if (flag)
+	if (TerminateTask() != -1)
+		flag = scheduler();
+	if (flag!=-1)
 		return;
 
 }
@@ -132,25 +131,26 @@ void TASK(3)
 L_3_0:
 	current_pc[3] = 0;
 	LED_3();
-	flag = Round_Robin_Schedule();
+	flag = scheduler();
 	current_pc[3]++;
-	if (flag) return;
+	if (flag!=-1) return;
 L_3_1:
 	LED_3();
-	flag = Round_Robin_Schedule();
+	flag = scheduler();
 	current_pc[3]++;
-	if (flag)return;
+	if (flag!=-1)return;
 L_3_2:
 	LED_3();
-	flag = Round_Robin_Schedule();
+	flag = scheduler();
 	current_pc[3]++;
-	if (flag)
+	if (flag!=-1)
 		return;
 L_3_3:
 	printf("task3 Terminate\n");
 	current_pc[3] = 0;
-	flag = TerminateTask();
-	if (flag)
+	if (TerminateTask() != -1)
+		flag = scheduler();
+	if (flag!=-1)
 		return;
 }
 

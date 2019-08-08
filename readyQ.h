@@ -31,14 +31,13 @@ extern int wholesize;
 #define is_full(p) (size[(p)] == MAX_QUEUE_LENGTH-1)
 #define is_empty() (wholesize == 0)
 extern Queue readyQ[MAX_PRIORITY + 1][MAX_QUEUE_LENGTH];
-int reschedule(API api, unsigned char);
-int Round_Robin_Schedule();
-void push_task_into_readyQ(unsigned char t, unsigned char p, int pc, push_type flag);
+int scheduler();
+void push_task_into_readyQ(unsigned char t, unsigned char p, int pc);
 void get_task_from_readyQ(unsigned char* t, unsigned char* p);
 //mutex 가지고 있는 task 꺼내기 
-void get_task_from_readyQ_position(unsigned char*, unsigned char*, mutex_pt*);
+void get_task_from_readyQ_position(unsigned char*, unsigned char*, mutex_pt*, int loc);
+//void push_task_into_readyQ_position(unsigned char, unsigned char, int pc, mutex_pt*, int loc);
 //void get_task_form_readyQ_RR(unsigned char *t, unsigned char *p, int);
-void initializeQueue();
 
 extern unsigned char min_activation_order[NUM_OF_TASKS + 1];
 extern unsigned char max_activation_order[NUM_OF_TASKS + 1];

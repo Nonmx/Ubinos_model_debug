@@ -1,12 +1,18 @@
 #include "ubinos.h"
 #include "config.h"
 
+#ifndef WAITINGQ_H_
+
+#define WAITING_H_
+
 #define QSIZE 15
 
-typedef struct
+
+typedef struct 
 {
 	unsigned char tid;
 	unsigned char prio;
+	OWNER owner;
 }WQ;
 
 //int Front = 0;
@@ -28,7 +34,8 @@ int PRIORITY;
 
 WQ waitingQ[MAX_PRIORITY + 1][QSIZE];
 
-void push_task_into_WQ(unsigned char, unsigned char);
-void get_task_from_WQ(unsigned char*, unsigned char*);
+void push_task_into_WQ(unsigned char, unsigned char,OWNER);
+void get_task_from_WQ(unsigned char*, unsigned char*,OWNER, int,int);
+int Find_Btask(int* pri_loc, int* task_loc, OWNER owner);
 
-
+#endif

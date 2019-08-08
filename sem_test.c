@@ -47,8 +47,7 @@ void TASK(1) //Adding
 L_1_0:
 
 	current_pc[1]++;
-	flag = RR();
-	if (flag)
+	scheduler();
 		return;
 L_1_1:
 	current_pc[1] = 2;
@@ -64,30 +63,30 @@ L_1_1:
 		//printf("task3 sem_data: %d\n\n", sem[0]
 			//.counter);
 		sem_flag[1] = sem_give(&sem);
-		if (sem_flag[1])
-			return;
+		if (!sem_flag[1])
+			scheduler();
+		return;
 
 	L_1_3:
 
 		current_pc[1] = 4;
-		flag = RR();
-		if (flag)
-			return;
+		scheduler();
+		return;
 
 
 	L_1_4:
 		current_pc[1] = 2;
 	}
 	current_pc[1] = 5;
-	flag = RR();
-	if (flag)
-		return;
+	scheduler();
+	return;
 L_1_5:
 	current_pc[1] = 0;
 	printf("task1 going to Terminate\n\n");
 	flag = TerminateTask();
-	if (flag)
-		return;
+	if (!flag)
+		scheduler();
+	return;
 
 }
 
@@ -119,8 +118,9 @@ L_2_0:
 		//printf("task2 sem_data: %d\n\n", sem[0].counter);
 		sem_flag[2] = sem_take(&sem);
 		//printf("task2 sem_data: %d\n\n", sem[0].counter);
-		if (sem_flag[2])
-			return;
+		if (!sem_flag[2])
+			scheduler();
+		return;
 		//printf("task 2 consumes one\n\n");
 	L_2_1:
 		printf("task2 counsumes one\n\n");
@@ -129,8 +129,9 @@ L_2_2:
 	current_pc[2] = 0;
 	printf("task2 going to Terminate\n\n");
 	flag = TerminateTask();
-	if (flag)
-		return;
+	if (!flag)
+		scheduler();
+	return;
 L_2_3:
 	;
 
@@ -162,8 +163,9 @@ L_3_0:
 		//printf("task3 sem_data: %d\n\n", sem[0].counter);
 		sem_flag[3] = sem_take(&sem);
 		//printf("task3 sem_data: %d\n\n", sem[0].counter);
-		if (sem_flag[3])
-			return;
+		if (!sem_flag[3])
+			scheduler();
+		return;
 		//printf("task 3 consumes one\n\n");
 	L_3_1:
 
@@ -173,8 +175,9 @@ L_3_2:
 	current_pc[3] = 0;
 	printf("task3 going to Terminate\n\n");
 	flag = TerminateTask();
-	if (flag)
-		return;
+	if (!flag)
+		scheduler();
+	return;
 
 L_3_3:
 	;
@@ -212,19 +215,4 @@ void running()
 		else if (current_tid == 3)
 			TASK(3);
 	}
-}
-
-extern int Round_Robin_Schedule();
-
-int RR()
-{
-	if ((Round_Robin_Schedule()) != 0)
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
-
 }

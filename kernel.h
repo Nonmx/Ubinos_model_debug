@@ -10,8 +10,15 @@ Author : Yang Song
 #include "config.h"
 
 
+
+
+
+
+
 unsigned char ecode;
 unsigned char error[NUM_OF_TASKS];
+
+extern int scheduler();
 
 int task_create(unsigned char);
 //mapping from ActivateTASK
