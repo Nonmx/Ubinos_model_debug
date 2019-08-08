@@ -126,20 +126,24 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="kernel.h" />
     <ClInclude Include="messageQ.h" />
+    <ClInclude Include="Msgq_WaitQ.h" />
     <ClInclude Include="mylib.h" />
     <ClInclude Include="os.h" />
     <ClInclude Include="readyQ.h" />
+    <ClInclude Include="Sem_WaitQ.h" />
     <ClInclude Include="ubinos.h" />
-    <ClInclude Include="waitingQ.h" />
+    <ClInclude Include="Mutex_WaitQ.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="initialize.c" />
     <ClCompile Include="kernel.c" />
     <ClCompile Include="messageQ.c" />
     <ClCompile Include="model.c" />
+    <ClCompile Include="Msgq_WaitQ.c" />
     <ClCompile Include="mutex_test3.c" />
     <ClCompile Include="readyQ.c" />
-    <ClCompile Include="waitingQ.c" />
+    <ClCompile Include="Mutex_WaitQ.c" />
+    <ClCompile Include="Sem_WaitQ.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

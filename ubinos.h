@@ -97,6 +97,15 @@ typedef struct {
 	unsigned char preemptable;
 }task_dynamic_stat;
 
+#define WAITQ_SIZE 15
+
+typedef struct
+{
+	unsigned char tid;
+	unsigned char prio;
+	int timed_flag;
+}WQ;
+
 typedef struct {
 	int flag;// -1 = mutex 없다, 0 = unlocked, 1 = locked
 	char owner;//locked 가지고 있는  task
@@ -105,6 +114,16 @@ typedef struct {
 	int tra_flag;
 	int signal;
 	int block_flag;
+	int timed_flag;
+
+	//mutex waitQ
+	int SIZE[MAX_PRIORITY + 1];
+	int WHOLESIZE;
+	int PRIORITY;
+	int Front[MAX_PRIORITY + 1];
+	int Rear[MAX_PRIORITY + 1];
+	WQ mutexQ[MAX_PRIORITY + 1][WAITQ_SIZE];
+
 }mutex_pt;
 
 
@@ -112,6 +131,18 @@ typedef struct {
 	int counter;
 	unsigned int lock_call[NUM_OF_TASKS];
 	//unsigned char Lock; //locked?? task ????
+
+
+	int timed_flag;
+	//sem waitQ
+	int SIZE[MAX_PRIORITY + 1];
+	int WHOLESIZE;
+	int PRIORITY;
+	int Front[MAX_PRIORITY + 1];
+	int Rear[MAX_PRIORITY + 1];
+	WQ mutexQ[MAX_PRIORITY + 1][WAITQ_SIZE];
+
+
 }sem_pt;
 
 #define messageQ_SIZE 25
@@ -122,8 +153,25 @@ typedef struct {
 
 typedef struct {
 	int flag;
+
+	int SIZE[MAX_PRIORITY + 1];
+	int WHOLESIZE;
+	int PRIORITY;
+	int Front[MAX_PRIORITY + 1];
+	int Rear[MAX_PRIORITY + 1];
+	WQ mutexQ[MAX_PRIORITY + 1][WAITQ_SIZE];
+
 	MQ Message_Queue[messageQ_SIZE];
 }msgq_pt;
+
+
+typedef struct
+{
+	unsigned char tid;
+	unsigned char prio;
+}SLEEP;
+
+SLEEP Sleep_Q[WAITQ_SIZE];
 
 /*typedef struct{
 	unsigned char prio;

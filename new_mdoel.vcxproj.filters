@@ -33,10 +33,16 @@
     <ClInclude Include="ubinos.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="waitingQ.h">
+    <ClInclude Include="messageQ.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="messageQ.h">
+    <ClInclude Include="Mutex_WaitQ.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Sem_WaitQ.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Msgq_WaitQ.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -56,10 +62,16 @@
     <ClCompile Include="readyQ.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="waitingQ.c">
+    <ClCompile Include="mutex_test3.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="mutex_test3.c">
+    <ClCompile Include="Mutex_WaitQ.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Sem_WaitQ.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Msgq_WaitQ.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
