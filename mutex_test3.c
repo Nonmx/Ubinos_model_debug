@@ -38,7 +38,7 @@ void TASK(1)
 L_1_0:
 	printf("task1 locking mutex\n\n");
 	current_pc[1]++;
-	flag = mutex_lock(&mutex);
+	flag = mutex_lock(mutex);
 	if (!flag)
 		scheduler();
 	return;
@@ -53,7 +53,7 @@ L_1_2:
 	printf("task1 keep running\n\n");
 	printf("task1 unlocing mutex\n\n");
 	current_pc[1]++;
-	flag = mutex_unlock(&mutex);
+	flag = mutex_unlock(mutex);
 	if (!flag)
 		scheduler();
 	return;
@@ -119,14 +119,14 @@ void TASK(3)
 L_3_0:
 	printf("task3 try to locking mutex\n\n");
 	current_pc[3]++;
-	flag = mutex_lock(&mutex);
+	flag = mutex_lock(mutex);
 	if (!flag)
 		scheduler();
 	return;
 L_3_1:
 	printf("task3 unlock the mutex\n\n");
 	current_pc[3]++;
-	flag = mutex_unlock(&mutex);
+	flag = mutex_unlock(mutex);
 	if (!flag)
 		scheduler();
 	return;
@@ -140,18 +140,33 @@ L_3_2:
 
 }
 
-
+extern Mutex* mutex_list;
 
 void main()
 {
 
-	mutex_create(&mutex);
+	msgq_pt msgq1;
+	mutex_pt mutex2;
+	mutex_pt mutex3;
+	mutex_pt mutex4;
+
+	//mutex_create(&mutex);
+	//mutex_create(&mutex2);
+	//mutex_create(&mutex3);
+	//mutex_create(&mutex4);
+	msgq_create(&msgq1,20,10);
+
+	if (mutex_list[1].flag == -1)
+	{
+		printf("ok");
+	}
 
 	printf("create task1.\n\n");
 	task_create(1);
 	ubik_comp_start();
 
 	mutex_delete(&mutex);
+	ShutDownOS();
 }
 
 

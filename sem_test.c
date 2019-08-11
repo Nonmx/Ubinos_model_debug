@@ -62,7 +62,7 @@ L_1_1:
 		printf("task1 has produced one\n\n");
 		//printf("task3 sem_data: %d\n\n", sem[0]
 			//.counter);
-		sem_flag[1] = sem_give(&sem);
+		sem_flag[1] = sem_give(sem);
 		if (!sem_flag[1])
 			scheduler();
 		return;
@@ -116,7 +116,7 @@ L_2_0:
 		j++;
 		//printf("i am task2");
 		//printf("task2 sem_data: %d\n\n", sem[0].counter);
-		sem_flag[2] = sem_take(&sem);
+		sem_flag[2] = sem_take(sem);
 		//printf("task2 sem_data: %d\n\n", sem[0].counter);
 		if (!sem_flag[2])
 			scheduler();
@@ -161,7 +161,7 @@ L_3_0:
 	{
 		l++;
 		//printf("task3 sem_data: %d\n\n", sem[0].counter);
-		sem_flag[3] = sem_take(&sem);
+		sem_flag[3] = sem_take(sem);
 		//printf("task3 sem_data: %d\n\n", sem[0].counter);
 		if (!sem_flag[3])
 			scheduler();
@@ -199,6 +199,7 @@ void main()
 	ubik_comp_start();
 
 	sem_delete(&sem);
+	ShutDownOS();
 	//assert(num == 0);
 	//system("pause");
 	//free(sem);

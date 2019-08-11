@@ -8,7 +8,7 @@ Date: 08/09/2016
 //#include <assert.h>
 #include <stdio.h>
 #include "readyQ.h"
-#include "ubinos.h"
+//#include "ubinos.h"
 #include "mylib.h"
 #include <stdlib.h>
 
@@ -62,7 +62,8 @@ void push_task_into_readyQ(unsigned char t, unsigned char p, int pc)
 
 void get_task_from_readyQ(unsigned char* t, unsigned char* p)
 {
-	int i = 0;
+
+
 	if (is_empty() && !(is_sleeping()))
 	{
 		printf("Queue is empty\n");
@@ -106,7 +107,7 @@ void get_task_from_readyQ(unsigned char* t, unsigned char* p)
 
 int temp_rear;
 
-void get_task_from_readyQ_position(unsigned char* t, unsigned char* p, mutex_pt *mutex,int loc)
+void get_task_from_readyQ_position(unsigned char* t, unsigned char* p, mutex_pt mid,Mutex *mutex,int loc)
 {
 	int i = 0;
 	if (is_empty() && !(is_sleeping()))
@@ -117,70 +118,76 @@ void get_task_from_readyQ_position(unsigned char* t, unsigned char* p, mutex_pt 
 	else if (!is_empty())
 	{
 
-		*t = readyQ[task_dyn_info[mutex->owner].dyn_prio][loc].tid;
-		*p = task_dyn_info[mutex->owner].dyn_prio;
+		*t = readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][loc].tid;
+		*p = task_dyn_info[mutex[mid].owner].dyn_prio;
 		cur_activation_order[*t] = readyQ[max_prio][front[max_prio]].activation_order;
 		//current_pc[*t] = readyQ[max_prio][front[max_prio]].pc;
 		//truncate popped index
-		readyQ[task_dyn_info[mutex->owner].dyn_prio][loc].tid = -1;
-		readyQ[task_dyn_info[mutex->owner].dyn_prio][loc].pc = -1;
+		readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][loc].tid = -1;
+		readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][loc].pc = -1;
 
 
-		temp_rear = rear[mutex->owner];
+		
+		temp_rear = rear[mutex[mid].owner];
 
-		if (front[mutex->owner] == loc)
+		if (front[mutex[mid].owner] == loc)
 		{
-			front[mutex->owner] = (front[mutex->owner] + 1) % MAX_QUEUE_LENGTH;
+			front[mutex[mid].owner] = (front[mutex[mid].owner] + 1) % MAX_QUEUE_LENGTH;
 		}
-		else if (loc < temp_rear)//task가 waitQ의 중간에 꺼내면 이 task가 뒤에 있는 task들이 다 앞으로 다시 push 해야 한다.
+		else if ((loc + 1+ MAX_QUEUE_LENGTH)%MAX_QUEUE_LENGTH == rear[mutex[mid].owner])
 		{
-			if (temp_rear == 0)
-				temp_rear = MAX_QUEUE_LENGTH; //temp_Rear는 0이면 1를 빼면 lowerbound 가능성이 있으니까 temp_Rear= 15로 하고 1빼면 14이기 때문에 0 칸 앞에 것은 딱 맞아.
-			while ((temp_rear - 1) != rear[mutex->owner]) { //모든 task가 다 1칸 앞에서 push 하면 최종적으로 Rear는 1만큼을 감소한다.
-				rear[mutex->owner] = loc;
-				loc++;
-				push_task_into_readyQ(readyQ[mutex->owner][loc].tid, task_dyn_info[readyQ[mutex->owner][loc].tid].dyn_prio,current_pc[readyQ[mutex->owner][loc].tid]);
+			rear[mutex[mid].owner]--;
+			if(rear[mutex[mid].owner] < 0)
+				rear[mutex[mid].owner] = MAX_QUEUE_LENGTH - 1;
+		}
+		else if(rear[mutex[mid].owner] < loc)
+		{
+			for(i = loc; i<=(rear[mutex[mid].owner]+MAX_QUEUE_LENGTH-1);i++)
+			{
+				readyQ[mutex[mid].owner][i].activation_order = readyQ[mutex[mid].owner][i++].activation_order;
+				readyQ[mutex[mid].owner][i].pc = readyQ[mutex[mid].owner][i++].pc;
+				readyQ[mutex[mid].owner][i].tid = readyQ[mutex[mid].owner][i++].tid;
+				readyQ[mutex[mid].owner][i].type = readyQ[mutex[mid].owner][i++].type;
 			}
+			rear[mutex[mid].owner]--;
+			if (rear[mutex[mid].owner] < 0)
+				rear[mutex[mid].owner] = MAX_QUEUE_LENGTH - 1;
+		}
+		
+		else
+		{
+			for (i = loc; i < rear[mutex[mid].owner]; i++)
+			{
+				readyQ[mutex[mid].owner][i].activation_order = readyQ[mutex[mid].owner][i++].activation_order;
+				readyQ[mutex[mid].owner][i].pc = readyQ[mutex[mid].owner][i++].pc;
+				readyQ[mutex[mid].owner][i].tid = readyQ[mutex[mid].owner][i++].tid;
+				readyQ[mutex[mid].owner][i].type = readyQ[mutex[mid].owner][i++].type;
+			}
+			rear[mutex[mid].owner]--;
 		}
 
-		//redefine front variable
-		//front[task_dyn_info[mutex->owner].dyn_prio] = (front[task_dyn_info[mutex->owner].dyn_prio] + 1) % MAX_QUEUE_LENGTH;
+
 		size[*p]--;
 		wholesize--;
-	}
-
-}
-
-
-void push_task_into_readyQ_position(unsigned char t, unsigned char p, int pc,mutex_pt* mutex,int loc)
-{
-	if (is_full(p)) //queue  is full
-	{
-		printf("Queue is full!\n");
-	}
-	else
-	{
-		readyQ[task_dyn_info[mutex->owner].dyn_prio][loc].tid = t;
-		readyQ[task_dyn_info[mutex->owner].dyn_prio][loc].pc = pc;
-		//rear[p] = (MAX_QUEUE_LENGTH + k + 1) % MAX_QUEUE_LENGTH;
-		//readyQ[p][k].activation_order = ++max_activation_order[t];
-
-		size[p]++; //increase size to check out whether it is full or empty.
-		wholesize++;
-
-		//reassign max_prio if current prio is bigger.
-		if (p > max_prio)
+		while (!size[max_prio] && max_prio != 0)
 		{
-			max_prio = p;
+			max_prio--;
 		}
+
+	
 	}
+
 }
+
 
 extern signed char current_tid;
 extern unsigned char current_prio;
 
+extern void multi_time_checker();
 int scheduler() {
+	
 
+	multi_time_checker();
 
 	if (is_idle() || api_suporter == API_TerminateTask || api_suporter == API_mutex_lock || api_suporter == API_sem_take)
 	{
@@ -220,20 +227,4 @@ int scheduler() {
 	}
 }
 
-
-
-/*int Round_Robin_Schedule()
-{
-	if (Hava_to_RR())
-	{
-		push_task_into_readyQ(current_tid, task_dyn_info[current_tid].dyn_prio, current_pc[current_tid], PREEMPT);
-		get_task_from_readyQ(&current_tid, &current_prio);
-		if (current_tid == -1)
-			return 0;
-		else
-			return 1;
-	}
-	else
-		return 0;
-}*/
 

@@ -46,12 +46,6 @@ typedef enum API {
 	API_mutex_unlock
 }API;
 
-typedef enum
-{
-	Mutex,
-	Sem,
-	Msgq
-}OWNER; //waitQ에서 있는 task는 mutex || sem || msgq관련된 API push하는지 check
 
 
 extern API api;
@@ -115,60 +109,72 @@ typedef struct {
 	int signal;
 	int block_flag;
 	int timed_flag;
+	int form_readyQ;
+	int form_sleepQ;
+	int form_semQ;
+	int form_mutexQ;
+	int form_msgqQ;
+	int mutex_timed_info[NUM_OF_TASKS+1];
+	int mutex_flag;
 
 	//mutex waitQ
-	int SIZE[MAX_PRIORITY + 1];
-	int WHOLESIZE;
-	int PRIORITY;
-	int Front[MAX_PRIORITY + 1];
-	int Rear[MAX_PRIORITY + 1];
-	WQ mutexQ[MAX_PRIORITY + 1][WAITQ_SIZE];
+	int Front;
+	int Rear;
+	WQ mutexQ[WAITQ_SIZE + 1];
+}Mutex;
 
-}mutex_pt;
+
+typedef int mutex_pt;
 
 
 typedef struct {
 	int counter;
 	unsigned int lock_call[NUM_OF_TASKS];
+	int sem_timed_info[NUM_OF_TASKS+1];
 	//unsigned char Lock; //locked?? task ????
-
-
-	int timed_flag;
+	int sem_flag;
 	//sem waitQ
-	int SIZE[MAX_PRIORITY + 1];
-	int WHOLESIZE;
-	int PRIORITY;
-	int Front[MAX_PRIORITY + 1];
-	int Rear[MAX_PRIORITY + 1];
-	WQ mutexQ[MAX_PRIORITY + 1][WAITQ_SIZE];
 
+	int Front;
+	int Rear;
+	WQ semQ[WAITQ_SIZE + 1];
 
-}sem_pt;
+}Sem;
+typedef int sem_pt;
 
 #define messageQ_SIZE 25
 
 typedef struct {
-	unsigned char message[messageQ_SIZE];
+	unsigned char *message;
 }MQ;
+typedef struct
+{
+	unsigned char* message;
+}message;
 
 typedef struct {
 	int flag;
+	int maxcounter;
+	int counter;
+	unsigned int msgsize;
 
-	int SIZE[MAX_PRIORITY + 1];
-	int WHOLESIZE;
-	int PRIORITY;
-	int Front[MAX_PRIORITY + 1];
-	int Rear[MAX_PRIORITY + 1];
-	WQ mutexQ[MAX_PRIORITY + 1][WAITQ_SIZE];
+	int Front;
+	int Rear;
+	message MESSAGE[NUM_OF_TASKS];
+	WQ msgqQ[WAITQ_SIZE];
 
-	MQ Message_Queue[messageQ_SIZE];
-}msgq_pt;
+	MQ *Message_Queue;
+}Msgq;
+Msgq* msgq_list;
+
+typedef int msgq_pt;
 
 
 typedef struct
 {
 	unsigned char tid;
 	unsigned char prio;
+	int time;
 }SLEEP;
 
 SLEEP Sleep_Q[WAITQ_SIZE];

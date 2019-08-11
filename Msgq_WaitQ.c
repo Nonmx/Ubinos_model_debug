@@ -1,112 +1,129 @@
-#include "ubinos.h"
+#include "msgq_WaitQ.h"
+//#include "ubinos.h"
 #include <stdio.h>
 #include <assert.h>
 
 
-int MSGQ_WQ_FULL(msgq_pt* msgq, unsigned char p)
+int MSGQ_WQ_FULL(msgq_pt msid, Msgq* msgq)
 {
-	if (msgq->SIZE[p] == msgq->WHOLESIZE - 1)
+	if ((msgq[msid].Rear + 1) % (WAITQ_SIZE + 1) == msgq[msid].Front)
+		return 1;
+	else
+		return 0;
+
+}
+
+int MSGQ_WQ_EMPTY(msgq_pt msid, Msgq* msgq)
+{
+	if (msgq[msid].Front == msgq[msid].Rear)
 		return 1;
 	else
 		return 0;
 }
 
-int MSGQ_WQ_EMPTY(msgq_pt* msgq)
+int Find_msgq_Btask(int* task_loc, int tid, msgq_pt msid, Msgq* msgq) //use for mutex lock_timed 
 {
-	if (msgq->WHOLESIZE == 0)
-		return 1;
-	else
-		return 0;
-}
-
-
-/*int Find_Btask(int* pri_loc, int* task_loc, msgq_pt* sem) // 
-{
-	int i = 1;
 	int j = 0;
-	for (i = 1; i < MAX_PRIORITY; i++)
+
+	for (j = 0; j < WAITQ_SIZE; j++)
 	{
-		for (j = 0; j < WAITQ_SIZE; j++)
+		if (msgq[msid].msgqQ[j].tid == tid)
 		{
-			if (sem->mutexQ[i][j].timed_flag > 0)
+			*task_loc = j;
+			return 0;//finded
+		}
+	}
+
+	return -1;//not find
+}
+
+void msgqQ_sort(msgq_pt msid, Msgq* msgq)
+{
+	unsigned char temp_tid;
+	unsigned char temp_prio;
+	int i = 0;
+	int j = 0;
+	for (i = msgq[msid].Front; i < msgq[msid].Rear; i++)
+	{
+		for (j = msgq[msid].Front; j < msgq[msid].Rear - i; j++)
+		{
+			if (task_dyn_info[msgq[msid].msgqQ[i].tid].dyn_prio < task_dyn_info[msgq[msid].msgqQ[i++].tid].dyn_prio)
 			{
-				*pri_loc = i;
-				*task_loc = j;
-				return 1;//finded
+				temp_tid = msgq[msid].msgqQ[i].tid;
+				temp_prio = msgq[msid].msgqQ[i].prio;
+
+				msgq[msid].msgqQ[i].tid = msgq[msid].msgqQ[i++].tid;
+				msgq[msid].msgqQ[i].prio = msgq[msid].msgqQ[i++].prio;
+
+				msgq[msid].msgqQ[i++].tid = temp_tid;
+				msgq[msid].msgqQ[i++].tid = temp_tid;
 			}
 		}
 	}
-	return 0;//not find
-}*/
+}
 
-
-void push_msgq_task_into_WQ(unsigned char tid, unsigned char p, msgq_pt* msgq)
+int push_msgq_task_into_WQ(unsigned char tid, unsigned char p, msgq_pt msid, Msgq* msgq)
 {
-	int temp;
-	if (MUTEX_WQ_FULL(msgq, p))
+	task_state[tid] = Blocked;
+	if (MSGQ_WQ_FULL(msid, msgq))
 	{
-		printf("waittingQ is full!\n");
-		//return 0;
+		printf("sem_waittingQ is full!\n");
+		return -1;
 	}
 	else
 	{
 		//printf("enQ -> rear: %d\n\n", Rear);
 		task_state[tid] = Blocked;
 		//printf("task_state[tid][act_counter[tid]] = %d \n", task_state[tid]);
-		temp = msgq->Rear[p];
-		msgq->mutexQ[p][temp].tid = tid;
-		msgq->mutexQ[p][temp].prio = p;
+		msgq[msid].msgqQ[msgq[msid].Rear].tid = tid;
+		msgq[msid].msgqQ[msgq[msid].Rear].prio = p;
+
+		msgq[msid].Rear = (WAITQ_SIZE + 1 + msgq[msid].Rear) % WAITQ_SIZE;
+		if (msgq[msid].Rear > 1)//More than one element, sorting
+		{
+			msgqQ_sort(msid, msgq);
+		}
+
+		return 0;
+
 	}
 
-	msgq->Rear[p] = (WAITQ_SIZE + temp + 1) % WAITQ_SIZE;
-	//return 1;
-
-
-	msgq->SIZE[p]++;
-	msgq->WHOLESIZE++;
-
-	if (p > msgq->PRIORITY)
-	{
-		msgq->PRIORITY = p;
-	}
 
 }
 
 int temp_Rear;
 
 
-void get_msgq_task_from_WQ(unsigned char* tid, unsigned char* prio, msgq_pt* msgq)
+int get_msgq_task_from_WQ(unsigned char* tid, unsigned char* prio, msgq_pt msid, Msgq* msgq)
 {
-	if (MUTEX_WQ_EMPTY(msgq))
+	if (MSGQ_WQ_EMPTY(msid, msgq))
 	{
-		printf("waitingQ is empty\n");
-		//current_tid = -1;
-		//return 0;
+		printf("sem_waitQ is empty\n");
+		return -1;
 	}
-	else {
-		//printf("deQ -> get_task_from_WQ ->front : %d\n\n", Front);
-		*tid = msgq->mutexQ[msgq->PRIORITY][msgq->Front[msgq->PRIORITY]].tid;
-		*prio = msgq->mutexQ[msgq->PRIORITY][msgq->Front[msgq->PRIORITY]].prio;
 
-		msgq->mutexQ[msgq->PRIORITY][msgq->Front[msgq->PRIORITY]].tid = -1;
-		msgq->mutexQ[msgq->PRIORITY][msgq->Front[msgq->PRIORITY]].prio = -1;
+	*tid = msgq[msid].msgqQ[msgq[msid].Front].tid;
+	*prio = msgq[msid].msgqQ[msgq[msid].Front].prio;
 
-		msgq->Front[msgq->PRIORITY] = (msgq->Front[msgq->PRIORITY] + 1) % WAITQ_SIZE;
+	msgq[msid].Front = (msgq[msid].Front + 1) % WAITQ_SIZE;
+	return 0;
 
-		msgq->SIZE[*prio]--;
-		msgq->WHOLESIZE--;
-
-		msgq->PRIORITY = *prio;
-		while (!(msgq->SIZE[msgq->PRIORITY]) && msgq->PRIORITY != 0)
-		{
-			msgq->PRIORITY--;
-		}
-	}
 }
 
-/*void get_task_from_WQ_position(unsigned char* tid, unsigned char* prio, msgq_pt* sem, int pri_loc, int task_loc) //use for lock timed
+int msgq_prio_change(unsigned char tid, unsigned char chan_prio, msgq_pt msid, Msgq* msgq, int loc)
 {
-	if (MUTEX_WQ_EMPTY(sem))
+	if (msgq[msid].msgqQ[loc].tid == tid) {
+		msgq[msid].msgqQ[loc].prio = chan_prio;
+		msgqQ_sort(msid, msgq);
+		return 0;
+	}
+	else
+		return -1;
+}
+
+void get_msgq_task_from_WQ_position(unsigned char* tid, unsigned char* prio, msgq_pt msid, Msgq* msgq, int task_loc) //use for lock timed
+{
+	if (MSGQ_WQ_EMPTY(msid, msgq))
 	{
 		printf("waitingQ is empty\n");
 		//current_tid = -1;
@@ -114,50 +131,41 @@ void get_msgq_task_from_WQ(unsigned char* tid, unsigned char* prio, msgq_pt* msg
 	}
 	else {
 		//printf("deQ -> get_task_from_WQ ->front : %d\n\n", Front);
-		*tid = sem->mutexQ[pri_loc][task_loc].tid;
-		*prio = sem->mutexQ[pri_loc][task_loc].prio;
-		assert(sem->mutexQ[pri_loc][task_loc].timed_flag > 0);
-		sem->mutexQ[pri_loc][task_loc].timed_flag--;
+		*tid = msgq[msid].msgqQ[task_loc].tid;
+		*prio = msgq[msid].msgqQ[task_loc].prio;
 
 
-		sem->mutexQ[pri_loc][task_loc].tid = -1;
-		sem->mutexQ[pri_loc][task_loc].prio = -1;
+
+		msgq[msid].msgqQ[task_loc].tid = 0; //
+		msgq[msid].msgqQ[task_loc].prio = 0;
 		//
-		temp_Rear = sem->Rear[pri_loc];
 
-		if (sem->Front[pri_loc] == task_loc)
+		if (msgq[msid].Front == task_loc)
 		{
-			sem->Front[pri_loc] = (sem->Front[pri_loc] + 1) % WAITQ_SIZE;
+			msgq[msid].Front = (msgq[msid].Front + 1) % WAITQ_SIZE;
 		}
 
-		else if (task_loc < temp_Rear)//task가 waitQ의 중간에 꺼내면 이 task가 뒤에 있는 task들이 다 앞으로 다시 push 해야 한다.
+		else if ((task_loc + 1 + WAITQ_SIZE) % WAITQ_SIZE == msgq[msid].Rear)//task가 waitQ의 중간에 꺼내면 이 task가 뒤에 있는 task들이 다 앞으로 다시 push 해야 한다.
 		{
-			if (task_loc + 1 == temp_Rear)
-			{
-				sem->Rear[pri_loc]--;
-			}
-			else if (task_loc + 1 < temp_Rear)
-			{
-				if (temp_Rear == 0)
-					temp_Rear = WAITQ_SIZE;//temp_Rear는 0이면 1를 빼면 lowerbound 가능성이 있으니까 temp_Rear= 15로 하고 1빼면 14이기 때문에 0 칸 앞에 것은 딱 맞아.
-				while ((temp_Rear - 1) != sem->Rear[pri_loc]) { //모든 task가 다 1칸 앞에서 push 하면 최종적으로 Rear는 1만큼을 감소한다.
-					sem->Rear[pri_loc] = task_loc;
-					task_loc++;
-					push_task_into_WQ(sem->mutexQ[pri_loc][task_loc].tid, task_dyn_info[sem->mutexQ[pri_loc][task_loc].tid].dyn_prio, sem);
-				}
-			}
+			msgq[msid].Rear--;
+			if (msgq[msid].Rear < 0)
+				msgq[msid].Rear = WAITQ_SIZE;
+		}
+		else if (msgq[msid].Rear < task_loc)
+		{
+			msgqQ_sort(msid, msgq);
+			if (msgq[msid].Rear < 0)
+				msgq[msid].Rear = WAITQ_SIZE;
+		}
+		else
+		{
+			msgqQ_sort(msid, msgq);
+			msgq[msid].Rear--;
 		}
 
-		sem->SIZE[*prio]--;
-		sem->WHOLESIZE--;
-
-		sem->PRIORITY = *prio;
-		while (!(sem->SIZE[sem->PRIORITY]) && sem->PRIORITY != 0)
-		{
-			sem->PRIORITY--;
-		}
 	}
 
-}*/
+}
+
 
 

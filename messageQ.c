@@ -23,19 +23,19 @@ int MQ_full()
 		return 0;
 }
 
-int push_message_into_MQ(msgq_pt* msgq, unsigned char* message)
+int push_message_into_MQ(msgq_pt msgq, unsigned char* message)
 {
 	if (MQ_full())
 	{
 		printf("messageQ is full!\n\n");
-		return 0;
+		return -1;
 	}
 	else
 	{
 		//*Messahe_Queue->messgae = message;
 		for (int i = 0; i < messageQ_SIZE; i++)
 		{
-			msgq->Message_Queue[R].message[i] = message[i];
+			msgq_list[msgq].Message_Queue[R].message[i] = message[i];
 			//printf("mess is %c", Message_Queue[R].messgae[i]);
 		}
 		//printf("mess is %s\n\n", Message_Queue->messgae);
@@ -45,7 +45,7 @@ int push_message_into_MQ(msgq_pt* msgq, unsigned char* message)
 	}
 }
 
-int get_message_from_MQ(msgq_pt* msgq, unsigned char* message)
+int get_message_from_MQ(msgq_pt msgq, unsigned char* message)
 {
 	//	printf("mess is %s \n\n", Message_Queue->messgae);
 	if (MQ_empty())
@@ -57,8 +57,8 @@ int get_message_from_MQ(msgq_pt* msgq, unsigned char* message)
 	{
 		for (int i = 0; i < messageQ_SIZE; i++)
 		{
-			message[i] = msgq->Message_Queue[F].message[i];
-			msgq->Message_Queue[F].message[i] = -1;
+			message[i] = msgq_list[msgq].Message_Queue[F].message[i];
+			msgq_list[msgq].Message_Queue[F].message[i] = -1;
 		}
 
 		//printf("mess is %s \n\n", message);

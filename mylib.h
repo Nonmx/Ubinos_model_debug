@@ -29,7 +29,8 @@ static __inline char is_sleeping()
 	int i;
 	for (i = 0; i < NUM_OF_TASKS; i++)
 	{
-		//Sleep_WaitQ[i]
+		if(Sleep_Q[i].time > 0)
+			a++;
 	}
 	return a > 0 ? 1 : 0;
 }
@@ -47,15 +48,73 @@ static __inline char Hava_to_RR()// readyQ???? ???????? task?? ????? priority???
 
 }
 
-static __inline int find_task(unsigned char tid,unsigned char prio)//find the task that locks the mutex
+static __inline int find_task_readyQ(unsigned char tid,unsigned char prio)//find the task that locks the mutex
 {
 	for (int i = 0; i < MAX_QUEUE_LENGTH; i++)
 	{
 		if (readyQ[prio][i].tid == tid)
 			return i;
 	}
+
+	return -1;//not found
+}
+extern int MID;
+extern int SID;
+extern int MSID;
+static __inline int find_task_mutexQ(unsigned char tid, Mutex* mutex,sem_pt *mutex_num)
+{
+	for (int j = 1; j < MID; j++)
+	{
+		for (int i = 0; i < WAITQ_SIZE; i++)
+		{
+			if (mutex[j].mutexQ[i].tid == tid)
+				* mutex_num = j;
+				return i;
+		}
+	}
+
+	return -1;//not found
 }
 
+static __inline int find_task_semQ(unsigned char tid, Sem* sem,sem_pt *sem_num)
+{
+	for (int j = 1; j < SID; j++)
+	{
+		for (int i = 0; i < WAITQ_SIZE; i++)
+		{
+			if (sem[j].semQ[i].tid == tid)
+				* sem_num = j;
+				return i;
+		}
+	}
+
+	return -1;//not found
+}
+
+static __inline int find_task_sleepQ(unsigned char tid)
+{
+	for (int i = 0; i < WAITQ_SIZE; i++)
+	{
+		if (Sleep_Q[i].tid== tid)
+			return i;
+	}
+
+	return -1;//not found
+}
+
+static __inline int find_task_msgqWQ(unsigned char tid, Msgq* msgq, msgq_pt *msgq_num)
+{
+	for (int j = 1; j < MSID; j++)
+	{
+		for (int i = 0; i < WAITQ_SIZE; i++)
+		{
+			if (msgq[j].msgqQ[i].tid == tid)
+				* msgq_num = j;
+			return i;
+		}
+	}
+	return -1;
+}
 
 /*static __inline int Find_Btask(int *pri_loc, int *task_loc, OWNER owner)
 {

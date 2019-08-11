@@ -5,9 +5,13 @@
 
 #define MSGQ_WAITQ_H_
 
-int MSGQ_WQ_FULL(msgq_pt* msgq, unsigned char p);
-int MSGQ_WQ_EMPTY(msgq_pt* msgq);
-void push_msgq_task_into_WQ(unsigned char, unsigned char, msgq_pt*);
-void get_msgq_task_from_WQ(unsigned char*, unsigned char*, msgq_pt*);
+int MSGQ_WQ_FULL(msgq_pt msid, Msgq* msgq);
+int MSGQ_WQ_EMPTY(msgq_pt msid, Msgq* msgq);
+int Find_msgq_Btask(int* task_loc, int tid, msgq_pt msid, Msgq* msgq);
+void msgqQ_sort(msgq_pt msid, Msgq* msgq);
+int push_msgq_task_into_WQ(unsigned char tid, unsigned char p, msgq_pt msid, Msgq* msgq);
+int get_msgq_task_from_WQ(unsigned char* tid, unsigned char* prio, msgq_pt msid, Msgq* msgq);
+int msgq_prio_change(unsigned char tid, unsigned char chan_prio, msgq_pt msid, Msgq* msgq, int loc);
+void get_msgq_task_from_WQ_position(unsigned char* tid, unsigned char* prio, msgq_pt msid, Msgq* msgq, int task_loc);
 
 #endif

@@ -42,6 +42,9 @@
     <ClInclude Include="Sem_WaitQ.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Sleep_WaitQ.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="Msgq_WaitQ.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -62,13 +65,16 @@
     <ClCompile Include="readyQ.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="mutex_test3.c">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Mutex_WaitQ.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Sleep_WaitQ.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="Sem_WaitQ.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="mutex_test3.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Msgq_WaitQ.c">
