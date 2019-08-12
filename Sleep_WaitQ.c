@@ -32,25 +32,29 @@ void sleepQ_sort()
 	
 	int i = 0;
 	int j = 0;
-	for (i = FRONT; i < REAR; i++)
+	
+	for (i = 0; i < (REAR - FRONT + WAITQ_SIZE)%WAITQ_SIZE; i++)
 	{
-		for (j = FRONT; j < REAR - i; j++)
+		int tp_front = FRONT;
+		for (j = 0; j < ((REAR - FRONT+WAITQ_SIZE)%WAITQ_SIZE) - i; j++)
 		{
-			if (Sleep_Q[j].time > Sleep_Q[j++].time)
-			{
-				temp_tid = Sleep_Q[j++].tid;
-				temp_prio = Sleep_Q[j++].prio;
-				temp_time = Sleep_Q[j++].time;
+			
+				if (Sleep_Q[tp_front].time > Sleep_Q[tp_front + 1].time && Sleep_Q[tp_front+1].time != -1)
+				{
+					temp_tid = Sleep_Q[tp_front].tid;
+					//temp_prio = Sleep_Q[tp_front].prio;
+					temp_time = Sleep_Q[tp_front].time;
 
 
-				Sleep_Q[j].tid = Sleep_Q[j++].tid;
-				Sleep_Q[j].prio = Sleep_Q[j++].prio;
-				Sleep_Q[j].time = Sleep_Q[j++].time;
+					Sleep_Q[tp_front].tid = Sleep_Q[tp_front + 1].tid;
+					//Sleep_Q[tp_front].prio = Sleep_Q[tp_front + 1].prio;
+					Sleep_Q[tp_front].time = Sleep_Q[tp_front + 1].time;
 
-				Sleep_Q[j++].tid = temp_tid;
-				Sleep_Q[j++].prio = temp_prio;
-				Sleep_Q[j++].time = temp_time;
-			}
+					Sleep_Q[tp_front + 1].tid = temp_tid;
+					//Sleep_Q[tp_front + 1].prio = temp_prio;
+					Sleep_Q[tp_front + 1].time = temp_time;
+				}
+				tp_front++;
 		}
 
 	}
@@ -67,7 +71,6 @@ int push_sleep_task_into_WQ(unsigned char tid, unsigned char prio, int time)
 	else
 	{
 		Sleep_Q[REAR].tid = tid;
-		Sleep_Q[REAR].prio = prio;
 		Sleep_Q[REAR].time = time;
 
 		REAR = (WAITQ_SIZE + REAR + 1) % WAITQ_SIZE;
@@ -92,7 +95,7 @@ int get_sleep_task_from_WQ(unsigned char* tid, unsigned char* prio)//DeQ is base
 	else
 	{
 		*tid = Sleep_Q[FRONT].tid;
-		*prio = Sleep_Q[FRONT].prio;
+		*prio = task_dyn_info[Sleep_Q[FRONT].tid].dyn_prio;
 		Sleep_Q[FRONT].time = -1;
 
 
@@ -106,7 +109,7 @@ int sleep_prio_change(unsigned char tid, unsigned char chan_prio,int loc)
 {
 	if (Sleep_Q[loc].tid == tid)
 	{
-		Sleep_Q[loc].prio = chan_prio; //timed based
+		task_dyn_info[Sleep_Q[loc].tid].dyn_prio = chan_prio; //timed based
 		return 0;
 	}
 	else
@@ -123,10 +126,10 @@ int get_sleep_task_from_WQ_position(unsigned char* tid, unsigned char* prio, int
 	else
 	{
 		*tid = Sleep_Q[loc].tid;
-		*prio = Sleep_Q[loc].prio;
+		*prio = task_dyn_info[Sleep_Q[loc].tid].dyn_prio;
 
 		Sleep_Q[loc].tid = 0;
-		Sleep_Q[loc].prio = 0;
+		//Sleep_Q[loc].prio = 0;
 		Sleep_Q[loc].time = -1;
 
 		if (FRONT == loc)

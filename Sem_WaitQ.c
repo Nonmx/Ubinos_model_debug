@@ -43,21 +43,24 @@ void semQ_sort(sem_pt sid, Sem* sem)
 	unsigned char temp_prio;
 	int i = 0;
 	int j = 0;
-	for (i = sem[sid].Front; i < sem[sid].Rear; i++)
+
+	for (i = 0; i < (sem[sid].Rear - sem[sid].Front + WAITQ_SIZE)%WAITQ_SIZE; i++)
 	{
-		for (j = sem[sid].Front; j < sem[sid].Rear - i; j++)
+		int tp_front = sem[sid].Front;
+		for (j = 0; j < (sem[sid].Rear - sem[sid].Front + WAITQ_SIZE)%WAITQ_SIZE-i; j++)
 		{
-			if (task_dyn_info[sem[sid].semQ[i].tid].dyn_prio < task_dyn_info[sem[sid].semQ[i++].tid].dyn_prio)
+			if (task_dyn_info[sem[sid].semQ[tp_front].tid].dyn_prio < task_dyn_info[sem[sid].semQ[tp_front+1].tid].dyn_prio)
 			{
-				temp_tid = sem[sid].semQ[i].tid;
-				temp_prio = sem[sid].semQ[i].prio;
+				temp_tid = sem[sid].semQ[tp_front+1].tid;
+				//temp_prio = sem[sid].semQ[tp_front+1].prio;
 
-				sem[sid].semQ[i].tid = sem[sid].semQ[i++].tid;
-				sem[sid].semQ[i].prio = sem[sid].semQ[i++].prio;
+				sem[sid].semQ[tp_front].tid = sem[sid].semQ[tp_front+1].tid;
+				//sem[sid].semQ[tp_front].prio = sem[sid].semQ[tp_front+1].prio;
 
-				sem[sid].semQ[i++].tid = temp_tid;
-				sem[sid].semQ[i++].tid = temp_tid;
+				sem[sid].semQ[tp_front+1].tid = temp_tid;
+				//sem[sid].semQ[tp_front+1]. = temp_tid;
 			}
+			tp_front++;
 		}
 	}
 }
@@ -77,7 +80,7 @@ int push_sem_task_into_WQ(unsigned char tid, unsigned char p, sem_pt sid, Sem* s
 		task_state[tid] = Blocked;
 		//printf("task_state[tid][act_counter[tid]] = %d \n", task_state[tid]);
 		sem[sid].semQ[sem[sid].Rear].tid = tid;
-		sem[sid].semQ[sem[sid].Rear].prio = p;
+		task_dyn_info[sem[sid].semQ[sem[sid].Rear].tid].dyn_prio = p;
 
 		sem[sid].Rear = (WAITQ_SIZE + 1 + sem[sid].Rear) % WAITQ_SIZE;
 		if ((sem[sid].Rear- sem[sid].Front+WAITQ_SIZE )% WAITQ_SIZE > 1)//More than one element, sorting
@@ -105,7 +108,7 @@ int get_sem_task_from_WQ(unsigned char* tid, unsigned char* prio, sem_pt sid, Se
 	}
 
 	*tid = sem[sid].semQ[sem[sid].Front].tid;
-	*prio = sem[sid].semQ[sem[sid].Front].prio;
+	*prio = task_dyn_info[sem[sid].semQ[sem[sid].Front].tid].dyn_prio;
 
 	sem[sid].Front = (sem[sid].Front + 1) % WAITQ_SIZE;
 	return 0;
@@ -115,7 +118,8 @@ int get_sem_task_from_WQ(unsigned char* tid, unsigned char* prio, sem_pt sid, Se
 int sem_prio_change(unsigned char tid, unsigned char chan_prio,sem_pt sid, Sem *sem, int loc)
 {
 	if (sem[sid].semQ[loc].tid == tid) {
-		sem[sid].semQ[loc].prio = chan_prio;
+
+		task_dyn_info[tid].dyn_prio = chan_prio;
 		semQ_sort(sid,sem);
 		return 0;
 	}
@@ -134,12 +138,12 @@ void get_sem_task_from_WQ_position(unsigned char* tid, unsigned char* prio, sem_
 	else {
 		//printf("deQ -> get_task_from_WQ ->front : %d\n\n", Front);
 		*tid = sem[sid].semQ[task_loc].tid;
-		*prio = sem[sid].semQ[task_loc].prio;
+		*prio = task_dyn_info[sem[sid].semQ[sem[sid].Front].tid].dyn_prio;
 
 
 
 		sem[sid].semQ[task_loc].tid = 0; //
-		sem[sid].semQ[task_loc].prio = 0;
+		//sem[sid].semQ[task_loc].prio = 0;
 		//
 
 		if (sem[sid].Front == task_loc)

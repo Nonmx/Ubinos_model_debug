@@ -44,21 +44,23 @@ void mutexQ_sort(mutex_pt mid, Mutex * mutex)
 	unsigned char temp_prio;
 	int i = 0;
 	int j = 0;
-	for (i = mutex[mid].Front; i < mutex[mid].Rear; i++)
+	for (i = 0; i < (mutex[mid].Rear - mutex[mid].Front + WAITQ_SIZE)%WAITQ_SIZE; i++)
 	{
-		for (j = mutex[mid].Front; j < mutex[mid].Rear-i; j++)
+		int tp_front = mutex[mid].Front;
+		for (j = 0; j < (mutex[mid].Rear - mutex[mid].Front + WAITQ_SIZE) % WAITQ_SIZE - i; j++)
 		{
-			if (task_dyn_info[mutex[mid].mutexQ[i].tid].dyn_prio < task_dyn_info[mutex[mid].mutexQ[i++].tid].dyn_prio)
+			if (task_dyn_info[mutex[mid].mutexQ[tp_front].tid].dyn_prio < task_dyn_info[mutex[mid].mutexQ[tp_front+1].tid].dyn_prio)
 			{
-				temp_tid = mutex[mid].mutexQ[i].tid;
-				temp_prio = mutex[mid].mutexQ[i].prio;
+				temp_tid = mutex[mid].mutexQ[tp_front+1].tid;
+				//temp_prio = mutex[mid].mutexQ[j+1].prio;
 
-				mutex[mid].mutexQ[i].tid = mutex[mid].mutexQ[i++].tid;
-				mutex[mid].mutexQ[i].prio = mutex[mid].mutexQ[i++].prio;
+				mutex[mid].mutexQ[tp_front].tid = mutex[mid].mutexQ[tp_front+1].tid;
+				//mutex[mid].mutexQ[i].prio = mutex[mid].mutexQ[j+1].prio;
 
-				mutex[mid].mutexQ[i++].tid = temp_tid;
-				mutex[mid].mutexQ[i++].tid = temp_tid;
+				mutex[mid].mutexQ[tp_front+1].tid = temp_tid;
+				//mutex[mid].mutexQ[j+1].tid = temp_tid;
 			}
+			tp_front++;
 		}
 	}
 }
@@ -79,7 +81,7 @@ int push_mutex_task_into_WQ(unsigned char tid, unsigned char p, mutex_pt mid,Mut
 		task_state[tid] = Blocked;
 		//printf("task_state[tid][act_counter[tid]] = %d \n", task_state[tid]);
 		mutex[mid].mutexQ[mutex[mid].Rear].tid = tid;
-		mutex[mid].mutexQ[mutex[mid].Rear].prio = p;
+		//mutex[mid].mutexQ[mutex[mid].Rear].prio = p;
 
 		mutex[mid].Rear = (WAITQ_SIZE + 1 + mutex[mid].Rear) % WAITQ_SIZE;
 
@@ -112,7 +114,7 @@ int get_mutex_task_from_WQ(unsigned char* tid, unsigned char* prio, mutex_pt mid
 	}
 
 	*tid = mutex[mid].mutexQ[mutex[mid].Front].tid;
-	*prio = mutex[mid].mutexQ[mutex[mid].Front].prio;
+	*prio = task_dyn_info[mutex[mid].mutexQ[mutex[mid].Front].tid].dyn_prio;
 
 	mutex[mid].Front = (mutex[mid].Front + 1) % WAITQ_SIZE;
 	return 0;
@@ -122,7 +124,8 @@ int get_mutex_task_from_WQ(unsigned char* tid, unsigned char* prio, mutex_pt mid
 int mutex_prio_change(unsigned char tid, unsigned char chan_prio, mutex_pt mid, Mutex* mutex, int loc)
 {
 	if (mutex[mid].mutexQ[loc].tid == tid) {
-		mutex[mid].mutexQ[loc].prio = chan_prio;
+
+		task_dyn_info[mutex[mid].mutexQ[loc].tid].dyn_prio = chan_prio;
 		mutexQ_sort(mid, mutex);
 		return 0;
 	}
@@ -141,13 +144,13 @@ void get_mutex_task_from_WQ_position(unsigned char* tid, unsigned char* prio,mut
 	else {
 		//printf("deQ -> get_task_from_WQ ->front : %d\n\n", Front);
 		*tid = mutex[mid].mutexQ[task_loc].tid;
-		*prio = mutex[mid].mutexQ[task_loc].prio;
+		*prio = task_dyn_info[mutex[mid].mutexQ[mutex[mid].Front].tid].dyn_prio;
 		//assert(mutex->mutexQ[pri_loc][task_loc].timed_flag > 0);
 		//mutex->mutexQ[pri_loc][task_loc].timed_flag--;
 
 
 		mutex[mid].mutexQ[task_loc].tid = 0; //
-		mutex[mid].mutexQ[task_loc].prio = 0;
+		//mutex[mid].mutexQ[task_loc].prio = 0;
 		//
 
 

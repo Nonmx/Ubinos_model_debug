@@ -122,10 +122,9 @@ unsigned char task_tid;
 
 void sleepQ_init()
 {
-	for (int i = 0; i < MAX_QUEUE_LENGTH; i++)
+	for (int i = 0; i < WAITQ_SIZE; i++)
 	{
 		Sleep_Q[i].tid = -1;
-		Sleep_Q[i].prio = -1;
 		Sleep_Q[i].time = -1;
 	}
 }
@@ -273,8 +272,8 @@ int mutex_lock(mutex_pt mid)
 			{
 				mutex_list[mid].form_readyQ = 1;
 				get_task_from_readyQ_position(&temp_tid, &temp_prio, mid, mutex_list, loc);
-				task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio; // priority inheritance
-				push_task_into_readyQ(temp_tid, task_dyn_info[temp_tid].dyn_prio, current_pc[temp_tid]);
+				//task_dyn_info[temp_tid].dyn_prio = ; 
+				push_task_into_readyQ(temp_tid, task_dyn_info[current_tid].dyn_prio, current_pc[temp_tid]);// priority inheritance
 				return 0;
 			}
 			else
@@ -283,8 +282,8 @@ int mutex_lock(mutex_pt mid)
 				if (sleep_loc != -1)
 				{
 					mutex_list[mid].form_sleepQ = 1;
-					task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
-					sleep_prio_change(mutex_list[mid].owner, task_dyn_info[mutex_list[mid].owner].dyn_prio, sleep_loc);
+					//task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
+					sleep_prio_change(mutex_list[mid].owner, task_dyn_info[current_tid].dyn_prio, sleep_loc);
 					return 0;
 				}
 				else
@@ -293,8 +292,8 @@ int mutex_lock(mutex_pt mid)
 					if (mutex_loc != -1)
 					{
 						mutex_list[mid].form_mutexQ = 1;
-						task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
-						mutex_prio_change(mutex_list[mid].owner, task_dyn_info[mutex_list[mid].owner].dyn_prio, temp_mutex_obj_num, mutex_list, mutex_loc);
+						//task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
+						mutex_prio_change(mutex_list[mid].owner, task_dyn_info[current_tid].dyn_prio, temp_mutex_obj_num, mutex_list, mutex_loc);
 
 						return 0;
 					}
@@ -304,8 +303,8 @@ int mutex_lock(mutex_pt mid)
 						if (sem_loc != -1)
 						{
 							mutex_list[mid].form_semQ = 1;
-							task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
-							sem_prio_change(mutex_list[mid].owner, task_dyn_info[mutex_list[mid].owner].dyn_prio, temp_sem_obj_num, sem_list, sem_loc);
+							//task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
+							sem_prio_change(mutex_list[mid].owner, task_dyn_info[current_tid].dyn_prio, temp_sem_obj_num, sem_list, sem_loc);
 							return 0;
 						}
 						else
@@ -314,8 +313,8 @@ int mutex_lock(mutex_pt mid)
 							if (msgq_loc != -1)
 							{
 								mutex_list[mid].form_msgqQ++;
-								task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
-								msgq_prio_change(mutex_list[mid].owner, task_dyn_info[mutex_list[mid].owner].dyn_prio, temp_msgq_obj_num, msgq_list, msgq_loc);
+								//task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
+								msgq_prio_change(mutex_list[mid].owner, task_dyn_info[current_tid].dyn_prio, temp_msgq_obj_num, msgq_list, msgq_loc);
 								return 0;
 							}
 							else
@@ -340,7 +339,7 @@ int mutex_lock(mutex_pt mid)
 
 int mutex_unlock(mutex_pt mid)
 {
-	API_Call_Suporter(API_mutex_unlock);
+	//API_Call_Suporter(API_mutex_unlock);
 	if (mutex_list[mid].flag == 1 && mutex_list[mid].lock_counter == 1 && mutex_list[mid].lock_call[current_tid] > 0)
 	{
 		unsigned char temp_tid;
@@ -535,6 +534,7 @@ void mutex_timer()
 
 int mutex_lock_timed(mutex_pt mid, unsigned int time)
 {
+	API_Call_Suporter(API_mutex_lock_timed);
 	mutex_list[mid].mutex_timed_info[current_tid] = time+1;
 	mutex_list[mid].mutex_flag = mutex_lock(mid);
 	return mutex_list[mid].mutex_flag;
@@ -597,7 +597,7 @@ int sem_give(sem_pt sid)
 	unsigned char temp_tid;
 	unsigned char temp_prio;
 
-	API_Call_Suporter(API_sem_give);
+
 
 	if (SEM_WQ_EMPTY(sid,sem_list))
 	{
@@ -677,6 +677,7 @@ void sem_timer()
 
 int sem_take_timed(sem_pt sid, int time)
 {
+	API_Call_Suporter(API_sem_take_timed);
 	sem_list[sid].sem_timed_info[current_tid] = time+1;
 	sem_list[sid].sem_flag = sem_take(sid);
 	return sem_list[sid].sem_flag;
@@ -697,6 +698,7 @@ void multi_time_checker()
 
 int msgq_create(msgq_pt *msid, unsigned int msgsize,unsigned int maxcount) 
 {
+
 	*msid = MSID;
 	if (msgq_list == NULL)
 	{
@@ -761,9 +763,13 @@ int messgae_write(unsigned char* message, msgq_pt msid, unsigned char tid)
 		}
 	}
 }
+*/
 
-int msgq_send(msgq_pt msid, unsigned char* message)
+
+int msgq_send(msgq_pt msid, static unsigned char* message)
 {
+
+	//API_Call_Suporter(API_msgq_send);
 	int r;
 	unsigned char* temp_message_buf;
 	unsigned char temp_tid;
@@ -774,36 +780,28 @@ int msgq_send(msgq_pt msid, unsigned char* message)
 	else
 	{
 		
-		r = SEM_WQ_EMPTY(msid, msgq_list);
-		
-		if (r == 0) //wq empty
+		if (!(MSGQ_WQ_EMPTY(msid, msgq_list)))
 		{
-			push_message_into_MQ(msid, message);
-			
+			get_msgq_task_from_WQ(&temp_tid, &temp_prio,msid,msgq_list);
+			//push_message_into_MQ(msid, message);
+			//msgq_list[msid].counter++;
+			push_task_into_readyQ(temp_tid, temp_prio, current_pc[current_tid]);
+			memcpy(msgq_list[msid].owner[temp_tid].buf, message, sizeof(char));
+			return 0;
 		}
 		else
 		{
-			get_msgq_task_from_WQ(&temp_tid, &temp_prio, msid, msgq_list);
-			if (msgq_list[msid].MESSAGE[temp_tid].message == NULL)
-			{
-				return -1;
-			}
-			messgae_write(message, msid, temp_tid);
-			//push_message_into_MQ(msid, message);
-			push_task_into_readyQ(temp_tid, temp_prio, current_pc[temp_tid]);
-			return 0;
-			
+			push_message_into_MQ(msid,message);
+			return 2;
 		}
 	}
 }
 
-void message_read(unsigned char *message,msgq_pt msid,unsigned char tid)
-{
 
-}
 
-int msgq_receive(msgq_pt msid, unsigned char* message)
+int msgq_receive(msgq_pt msid, static unsigned char* message)
 {
+	API_Call_Suporter(API_msgq_receive);
 	if (msgq_list[msid].counter > 0)
 	{
 		get_message_from_MQ(msid, message);
@@ -813,7 +811,7 @@ int msgq_receive(msgq_pt msid, unsigned char* message)
 	else
 	{
 		//messgae_write(message, msid,current_tid);//task->wtask_p->msg
-
+		msgq_list[msid].owner[current_tid].buf = &message;
 		push_msgq_task_into_WQ(current_tid, current_prio, msid,msgq_list);
 		return 0;
 	}
@@ -828,7 +826,7 @@ int msgq_delete(msgq_pt msid)
 	free(msgq_list[msid].Message_Queue);
 
 	return 0;
-}*/
+}
 
 
 

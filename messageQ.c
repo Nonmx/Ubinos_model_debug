@@ -32,13 +32,8 @@ int push_message_into_MQ(msgq_pt msgq, unsigned char* message)
 	}
 	else
 	{
-		//*Messahe_Queue->messgae = message;
-		for (int i = 0; i < messageQ_SIZE; i++)
-		{
-			msgq_list[msgq].Message_Queue[R].message[i] = message[i];
-			//printf("mess is %c", Message_Queue[R].messgae[i]);
-		}
-		//printf("mess is %s\n\n", Message_Queue->messgae);
+		memcpy(msgq_list[msgq].Message_Queue, message, sizeof(char));
+
 		R = (messageQ_SIZE + R + 1) % messageQ_SIZE;
 
 		return 1;
@@ -55,11 +50,7 @@ int get_message_from_MQ(msgq_pt msgq, unsigned char* message)
 	}
 	else
 	{
-		for (int i = 0; i < messageQ_SIZE; i++)
-		{
-			message[i] = msgq_list[msgq].Message_Queue[F].message[i];
-			msgq_list[msgq].Message_Queue[F].message[i] = -1;
-		}
+		memcpy(message, msgq_list[msgq].Message_Queue ,sizeof(char));
 
 		//printf("mess is %s \n\n", message);
 		F = (F + 1) % messageQ_SIZE;

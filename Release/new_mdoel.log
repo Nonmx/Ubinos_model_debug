@@ -1,7 +1,17 @@
-﻿  messageQ.c
+﻿  initialize.c
+  kernel.c
+  messageQ.c
+  model.c
+  Msgq_WaitQ.c
+  readyQ.c
+  Mutex_WaitQ.c
+  Sem_WaitQ.c
+  sleep_test.c
+  Sleep_WaitQ.c
+C:\Users\YangSong\Desktop\new_mdoel\new_mdoel\kernel.c(730,22): warning C4018:  '<': signed 또는 unsigned가 일치하지 않습니다.
   코드를 생성하고 있습니다.
-  7 of 29 functions (24.1%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
+  7 of 8 functions (87.5%) were compiled, the rest were copied from previous compilation.
+    4 functions were new in current compilation
     0 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
-  new_mdoel.vcxproj -> C:\Users\YangSong\source\repos\new_mdoel\Release\new_mdoel.exe
+  new_mdoel.vcxproj -> C:\Users\YangSong\Desktop\new_mdoel\Release\new_mdoel.exe

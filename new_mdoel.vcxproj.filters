@@ -74,10 +74,10 @@
     <ClCompile Include="Sem_WaitQ.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="mutex_test3.c">
+    <ClCompile Include="Msgq_WaitQ.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Msgq_WaitQ.c">
+    <ClCompile Include="msgq_test.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

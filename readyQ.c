@@ -141,9 +141,9 @@ void get_task_from_readyQ_position(unsigned char* t, unsigned char* p, mutex_pt 
 			for(i = loc; i< ((rear[mutex[mid].owner] - loc + MAX_QUEUE_LENGTH)% MAX_QUEUE_LENGTH);i++)
 			{
 				readyQ[mutex[mid].owner][i].activation_order = readyQ[mutex[mid].owner][i++].activation_order;
-				readyQ[mutex[mid].owner][i].pc = readyQ[mutex[mid].owner][i++].pc;
-				readyQ[mutex[mid].owner][i].tid = readyQ[mutex[mid].owner][i++].tid;
-				readyQ[mutex[mid].owner][i].type = readyQ[mutex[mid].owner][i++].type;
+				readyQ[mutex[mid].owner][i].pc = readyQ[mutex[mid].owner][i+1].pc;
+				readyQ[mutex[mid].owner][i].tid = readyQ[mutex[mid].owner][i+1].tid;
+				readyQ[mutex[mid].owner][i].type = readyQ[mutex[mid].owner][i+1].type;
 			}
 
 			rear[mutex[mid].owner] = MAX_QUEUE_LENGTH - 1;
@@ -153,10 +153,10 @@ void get_task_from_readyQ_position(unsigned char* t, unsigned char* p, mutex_pt 
 		{
 			for (i = loc; i < ((rear[mutex[mid].owner] - loc + MAX_QUEUE_LENGTH) % MAX_QUEUE_LENGTH); i++)
 			{
-				readyQ[mutex[mid].owner][i].activation_order = readyQ[mutex[mid].owner][i++].activation_order;
-				readyQ[mutex[mid].owner][i].pc = readyQ[mutex[mid].owner][i++].pc;
-				readyQ[mutex[mid].owner][i].tid = readyQ[mutex[mid].owner][i++].tid;
-				readyQ[mutex[mid].owner][i].type = readyQ[mutex[mid].owner][i++].type;
+				readyQ[mutex[mid].owner][i].activation_order = readyQ[mutex[mid].owner][i+1].activation_order;
+				readyQ[mutex[mid].owner][i].pc = readyQ[mutex[mid].owner][i+1].pc;
+				readyQ[mutex[mid].owner][i].tid = readyQ[mutex[mid].owner][i+1].tid;
+				readyQ[mutex[mid].owner][i].type = readyQ[mutex[mid].owner][i+1].type;
 			}
 			rear[mutex[mid].owner]--;
 		}

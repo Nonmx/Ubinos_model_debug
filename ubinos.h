@@ -41,6 +41,8 @@ typedef enum API {
 	API_sem_take,
 	API_msgq_receive,
 	API_mutex_lock,
+	API_mutex_lock_timed,
+	API_sem_take_timed,
 	API_msgq_send,
 	API_sem_give,
 	API_mutex_unlock
@@ -96,7 +98,7 @@ typedef struct {
 typedef struct
 {
 	unsigned char tid;
-	unsigned char prio;
+	//unsigned char prio;
 	int timed_flag;
 }WQ;
 
@@ -152,12 +154,18 @@ typedef struct
 	unsigned char* message;
 }message;
 
+
+typedef struct {
+	char* buf;
+}OWN;
+
 typedef struct {
 	int flag;
 	int maxcounter;
 	int counter;
 	unsigned int msgsize;
-
+	OWN owner[NUM_OF_TASKS];
+	//char* buf;
 	int Front;
 	int Rear;
 	message MESSAGE[NUM_OF_TASKS];
@@ -173,7 +181,7 @@ typedef int msgq_pt;
 typedef struct
 {
 	unsigned char tid;
-	unsigned char prio;
+	//unsigned char prio;
 	int time;
 }SLEEP;
 
