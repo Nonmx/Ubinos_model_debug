@@ -6,7 +6,7 @@
 
 int MSGQ_WQ_FULL(msgq_pt msid, Msgq* msgq)
 {
-	if ((msgq[msid].Rear + 1) % (WAITQ_SIZE + 1) == msgq[msid].Front)
+	if ((msgq[msid].Rear + 1) % WAITQ_SIZE  == msgq[msid].Front)
 		return 1;
 	else
 		return 0;
@@ -79,7 +79,7 @@ int push_msgq_task_into_WQ(unsigned char tid, unsigned char p, msgq_pt msid, Msg
 		msgq[msid].msgqQ[msgq[msid].Rear].prio = p;
 
 		msgq[msid].Rear = (WAITQ_SIZE + 1 + msgq[msid].Rear) % WAITQ_SIZE;
-		if (msgq[msid].Rear > 1)//More than one element, sorting
+		if ((msgq[msid].Rear-msgq[msid].Front+WAITQ_SIZE)%WAITQ_SIZE > 1)//More than one element, sorting
 		{
 			msgqQ_sort(msid, msgq);
 		}
@@ -144,18 +144,10 @@ void get_msgq_task_from_WQ_position(unsigned char* tid, unsigned char* prio, msg
 		{
 			msgq[msid].Front = (msgq[msid].Front + 1) % WAITQ_SIZE;
 		}
-
-		else if ((task_loc + 1 + WAITQ_SIZE) % WAITQ_SIZE == msgq[msid].Rear)//task가 waitQ의 중간에 꺼내면 이 task가 뒤에 있는 task들이 다 앞으로 다시 push 해야 한다.
-		{
-			msgq[msid].Rear--;
-			if (msgq[msid].Rear < 0)
-				msgq[msid].Rear = WAITQ_SIZE;
-		}
-		else if (msgq[msid].Rear < task_loc)
+		else if ((msgq[msid].Rear+WAITQ_SIZE)%WAITQ_SIZE == 0)
 		{
 			msgqQ_sort(msid, msgq);
-			if (msgq[msid].Rear < 0)
-				msgq[msid].Rear = WAITQ_SIZE;
+			msgq[msid].Rear = WAITQ_SIZE-1;
 		}
 		else
 		{

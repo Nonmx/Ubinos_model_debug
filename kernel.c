@@ -188,7 +188,7 @@ int mutex_create(mutex_pt* mutex)
 	}
 	else
 	{
-		mutex_list = (Mutex*)realloc(mutex_list,MID*2*sizeof(Mutex));
+		mutex_list = (Mutex*)realloc(mutex_list,(MID*2)*sizeof(Mutex));
 
 	}
 	if (mutex_list == NULL)

@@ -6,7 +6,7 @@
 
 int MUTEX_WQ_FULL(mutex_pt mid,Mutex * mutex)
 {
-	if ((mutex[mid].Rear + 1) % (WAITQ_SIZE + 1) == mutex[mid].Front)
+	if ((mutex[mid].Rear + 1) % WAITQ_SIZE  == mutex[mid].Front)
 		return 1;
 	else
 		return 0;
@@ -82,7 +82,8 @@ int push_mutex_task_into_WQ(unsigned char tid, unsigned char p, mutex_pt mid,Mut
 		mutex[mid].mutexQ[mutex[mid].Rear].prio = p;
 
 		mutex[mid].Rear = (WAITQ_SIZE + 1 + mutex[mid].Rear) % WAITQ_SIZE;
-		if (mutex[mid].Rear > 1)//More than one element, sorting
+
+		if ((mutex[mid].Rear - mutex[mid].Front+WAITQ_SIZE)%WAITQ_SIZE > 1)//More than one element, sorting
 		{
 			mutexQ_sort(mid,mutex);
 		}
@@ -154,18 +155,10 @@ void get_mutex_task_from_WQ_position(unsigned char* tid, unsigned char* prio,mut
 		{
 			mutex[mid].Front = (mutex[mid].Front + 1) % WAITQ_SIZE;
 		}
-	
-		else if ((task_loc + 1 + WAITQ_SIZE) % WAITQ_SIZE == mutex[mid].Rear)//task가 waitQ의 중간에 꺼내면 이 task가 뒤에 있는 task들이 다 앞으로 다시 push 해야 한다.
-		{
-			mutex[mid].Rear--;
-			if (mutex[mid].Rear < 0)
-				mutex[mid].Rear = WAITQ_SIZE;
-		}
-		else if (mutex[mid].Rear < task_loc)
+		else if ((mutex[mid].Rear+WAITQ_SIZE)%WAITQ_SIZE == 0)
 		{
 			mutexQ_sort(mid, mutex);
-			if (mutex[mid].Rear < 0)
-				mutex[mid].Rear = WAITQ_SIZE;
+			mutex[mid].Rear = WAITQ_SIZE;
 		}
 		else
 		{

@@ -60,6 +60,8 @@ void push_task_into_readyQ(unsigned char t, unsigned char p, int pc)
 	}
 }
 
+
+
 void get_task_from_readyQ(unsigned char* t, unsigned char* p)
 {
 
@@ -134,29 +136,22 @@ void get_task_from_readyQ_position(unsigned char* t, unsigned char* p, mutex_pt 
 		{
 			front[mutex[mid].owner] = (front[mutex[mid].owner] + 1) % MAX_QUEUE_LENGTH;
 		}
-		else if ((loc + 1+ MAX_QUEUE_LENGTH)%MAX_QUEUE_LENGTH == rear[mutex[mid].owner])
+		else if((rear[mutex[mid].owner]+MAX_QUEUE_LENGTH)%MAX_QUEUE_LENGTH == 0)
 		{
-			rear[mutex[mid].owner]--;
-			if(rear[mutex[mid].owner] < 0)
-				rear[mutex[mid].owner] = MAX_QUEUE_LENGTH - 1;
-		}
-		else if(rear[mutex[mid].owner] < loc)
-		{
-			for(i = loc; i<=(rear[mutex[mid].owner]+MAX_QUEUE_LENGTH-1);i++)
+			for(i = loc; i< ((rear[mutex[mid].owner] - loc + MAX_QUEUE_LENGTH)% MAX_QUEUE_LENGTH);i++)
 			{
 				readyQ[mutex[mid].owner][i].activation_order = readyQ[mutex[mid].owner][i++].activation_order;
 				readyQ[mutex[mid].owner][i].pc = readyQ[mutex[mid].owner][i++].pc;
 				readyQ[mutex[mid].owner][i].tid = readyQ[mutex[mid].owner][i++].tid;
 				readyQ[mutex[mid].owner][i].type = readyQ[mutex[mid].owner][i++].type;
 			}
-			rear[mutex[mid].owner]--;
-			if (rear[mutex[mid].owner] < 0)
-				rear[mutex[mid].owner] = MAX_QUEUE_LENGTH - 1;
+
+			rear[mutex[mid].owner] = MAX_QUEUE_LENGTH - 1;
 		}
 		
 		else
 		{
-			for (i = loc; i < rear[mutex[mid].owner]; i++)
+			for (i = loc; i < ((rear[mutex[mid].owner] - loc + MAX_QUEUE_LENGTH) % MAX_QUEUE_LENGTH); i++)
 			{
 				readyQ[mutex[mid].owner][i].activation_order = readyQ[mutex[mid].owner][i++].activation_order;
 				readyQ[mutex[mid].owner][i].pc = readyQ[mutex[mid].owner][i++].pc;
@@ -189,7 +184,7 @@ int scheduler() {
 
 	multi_time_checker();
 
-	if (is_idle() || api_suporter == API_TerminateTask || api_suporter == API_mutex_lock || api_suporter == API_sem_take)
+	if (is_idle() || api_suporter == API_TerminateTask || api_suporter == API_mutex_lock || api_suporter == API_sem_take || api_suporter == API_msgq_send || api_suporter == API_task_sleep)
 	{
 		api_suporter = -1;
 		get_task_from_readyQ(&current_tid, &current_prio);

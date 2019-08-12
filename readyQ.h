@@ -16,6 +16,7 @@ typedef enum {
 
 typedef struct queue {
 	unsigned char tid;
+	unsigned char prio;
 	unsigned char pc; //pc
 	unsigned char activation_order;
 	push_type type;

@@ -17,7 +17,7 @@ int Sleep_Empty()
 
 int Sleep_Full()
 {
-	if ((REAR + 1) % (WAITQ_SIZE + 1) == FRONT)
+	if ((REAR + 1) % WAITQ_SIZE  == FRONT)
 		return 1;
 	else
 		return 0;
@@ -26,6 +26,7 @@ int Sleep_Full()
 void sleepQ_sort()
 {
 	unsigned char temp_tid;
+
 	unsigned char temp_prio;
 	int temp_time;
 	
@@ -33,24 +34,24 @@ void sleepQ_sort()
 	int j = 0;
 	for (i = FRONT; i < REAR; i++)
 	{
-for (j = FRONT; j < REAR - i; j++)
-{
-	if (Sleep_Q[j].time > Sleep_Q[j++].time)
-	{
-		temp_tid = Sleep_Q[j++].tid;
-		temp_prio = Sleep_Q[j++].prio;
-		temp_time = Sleep_Q[j++].time;
+		for (j = FRONT; j < REAR - i; j++)
+		{
+			if (Sleep_Q[j].time > Sleep_Q[j++].time)
+			{
+				temp_tid = Sleep_Q[j++].tid;
+				temp_prio = Sleep_Q[j++].prio;
+				temp_time = Sleep_Q[j++].time;
 
 
-		Sleep_Q[j].tid = Sleep_Q[j++].tid;
-		Sleep_Q[j].prio = Sleep_Q[j++].prio;
-		Sleep_Q[j].time = Sleep_Q[j++].time;
+				Sleep_Q[j].tid = Sleep_Q[j++].tid;
+				Sleep_Q[j].prio = Sleep_Q[j++].prio;
+				Sleep_Q[j].time = Sleep_Q[j++].time;
 
-		Sleep_Q[j++].tid = temp_tid;
-		Sleep_Q[j++].prio = temp_prio;
-		Sleep_Q[j++].time = temp_time;
-	}
-}
+				Sleep_Q[j++].tid = temp_tid;
+				Sleep_Q[j++].prio = temp_prio;
+				Sleep_Q[j++].time = temp_time;
+			}
+		}
 
 	}
 }
@@ -69,12 +70,12 @@ int push_sleep_task_into_WQ(unsigned char tid, unsigned char prio, int time)
 		Sleep_Q[REAR].prio = prio;
 		Sleep_Q[REAR].time = time;
 
-		if (REAR > 1)
+		REAR = (WAITQ_SIZE + REAR + 1) % WAITQ_SIZE;
+
+		if ((REAR-FRONT + WAITQ_SIZE)%WAITQ_SIZE > 1) //If the element in the queue is greater than one
 		{
 			sleepQ_sort();
 		}
-
-		REAR = (WAITQ_SIZE + REAR + 1) % WAITQ_SIZE;
 		return 0;
 	}
 }
@@ -92,7 +93,7 @@ int get_sleep_task_from_WQ(unsigned char* tid, unsigned char* prio)//DeQ is base
 	{
 		*tid = Sleep_Q[FRONT].tid;
 		*prio = Sleep_Q[FRONT].prio;
-		Sleep_Q[FRONT].prio = -1;
+		Sleep_Q[FRONT].time = -1;
 
 
 		FRONT = (FRONT + 1) % WAITQ_SIZE;
@@ -132,16 +133,10 @@ int get_sleep_task_from_WQ_position(unsigned char* tid, unsigned char* prio, int
 		{
 			FRONT = (FRONT + 1) % WAITQ_SIZE;
 		}
-		else if ((loc + 1 + WAITQ_SIZE) % WAITQ_SIZE == REAR)
-		{
-			REAR--;
-			if (REAR < 0)
-				REAR = WAITQ_SIZE - 1;
-		}
-		else if (REAR == 0)
+		else if ((REAR+WAITQ_SIZE)%WAITQ_SIZE == 0)
 		{
 			sleepQ_sort();
-			REAR = WAITQ_SIZE-1;
+			REAR = WAITQ_SIZE - 1;
 		}
 		else
 		{

@@ -6,7 +6,7 @@
 
 int SEM_WQ_FULL(sem_pt sid, Sem* sem)
 {
-	if ((sem[sid].Rear + 1) % (WAITQ_SIZE + 1) == sem[sid].Front)
+	if ((sem[sid].Rear + 1) % WAITQ_SIZE  == sem[sid].Front)
 		return 1;
 	else
 		return 0;
@@ -80,7 +80,7 @@ int push_sem_task_into_WQ(unsigned char tid, unsigned char p, sem_pt sid, Sem* s
 		sem[sid].semQ[sem[sid].Rear].prio = p;
 
 		sem[sid].Rear = (WAITQ_SIZE + 1 + sem[sid].Rear) % WAITQ_SIZE;
-		if (sem[sid].Rear > 1)//More than one element, sorting
+		if ((sem[sid].Rear- sem[sid].Front+WAITQ_SIZE )% WAITQ_SIZE > 1)//More than one element, sorting
 		{
 			semQ_sort(sid, sem);
 		}
@@ -146,18 +146,10 @@ void get_sem_task_from_WQ_position(unsigned char* tid, unsigned char* prio, sem_
 		{
 			sem[sid].Front = (sem[sid].Front + 1) % WAITQ_SIZE;
 		}
-
-		else if ((task_loc + 1 + WAITQ_SIZE) % WAITQ_SIZE == sem[sid].Rear)//task가 waitQ의 중간에 꺼내면 이 task가 뒤에 있는 task들이 다 앞으로 다시 push 해야 한다.
-		{
-			sem[sid].Rear--;
-			if (sem[sid].Rear < 0)
-				sem[sid].Rear = WAITQ_SIZE;
-		}
-		else if (sem[sid].Rear < task_loc)
+		else if ((sem[sid].Rear+WAITQ_SIZE)%WAITQ_SIZE  == 0)
 		{
 			semQ_sort(sid, sem);
-			if (sem[sid].Rear < 0)
-				sem[sid].Rear = WAITQ_SIZE;
+			sem[sid].Rear = WAITQ_SIZE-1;
 		}
 		else
 		{
