@@ -165,7 +165,7 @@ typedef struct {
 
 	MQ *Message_Queue;
 }Msgq;
-Msgq* msgq_list;
+
 
 typedef int msgq_pt;
 

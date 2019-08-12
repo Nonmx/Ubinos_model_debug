@@ -50,6 +50,8 @@ int msgq_receive(msgq_pt, unsigned char*);
 int msgq_send(msgq_pt, unsigned char*);
 int msgq_delete(msgq_pt*);
 
+
+
 void multi_time_checker();
 extern int os_on;
 extern const int ON;

@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "ubinos.h"
 
-
+extern Msgq* msgq_list;
 int F = 0;
 int R = 0;
 

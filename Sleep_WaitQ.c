@@ -105,7 +105,7 @@ int sleep_prio_change(unsigned char tid, unsigned char chan_prio,int loc)
 {
 	if (Sleep_Q[loc].tid == tid)
 	{
-		Sleep_Q[loc].prio = chan_prio; //
+		Sleep_Q[loc].prio = chan_prio; //timed based
 		return 0;
 	}
 	else

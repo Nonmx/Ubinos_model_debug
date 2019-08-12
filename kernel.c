@@ -40,9 +40,9 @@ unsigned char current_prio;
 extern int act_counter[NUM_OF_TASKS + 1];
 
 
+Msgq* msgq_list = NULL;
 Mutex* mutex_list = NULL;
 Sem* sem_list = NULL;
-Msgq* msgq_list = NULL;
 
 void API_Call_Suporter(API api);
 
@@ -180,7 +180,6 @@ int sleep_timer()//Wake up the task
 
 int mutex_create(mutex_pt* mutex)
 {
-	
 	*mutex = MID;
 	creation_times++;
 	if (mutex_list == NULL)
@@ -220,8 +219,6 @@ int mutex_create(mutex_pt* mutex)
 
 		MID++;
 		return 0;
-	
-	
 }
 
 
@@ -402,7 +399,6 @@ int mutex_unlock(mutex_pt mid)
 							mutex_list[mid].tra_flag--;
 							task_dyn_info[mutex_list[mid].owner].dyn_prio = task_static_info[mutex_list[mid].owner].prio;
 							sleep_prio_change(mutex_list[mid].owner, task_dyn_info[mutex_list[mid].owner].dyn_prio, sleep_loc);
-							return 0;
 						}
 						else
 						{
@@ -420,7 +416,7 @@ int mutex_unlock(mutex_pt mid)
 								if (msgq_loc != -1)
 								{
 									mutex_list[mid].form_msgqQ++;
-									task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
+									task_dyn_info[mutex_list[mid].owner].dyn_prio = task_dyn_info[current_tid].dyn_prio;
 									msgq_prio_change(mutex_list[mid].owner, task_dyn_info[mutex_list[mid].owner].dyn_prio, temp_msgq_obj_num, msgq_list, msgq_loc);
 								}
 								else
@@ -494,6 +490,7 @@ int mutex_flag;
 void mutex_timer()
 {
 	int ret_val = 0;
+	if(mutex_list!= NULL)
 	{
 		for (int j = 1; j < MID; j++) //mutex ID starting from 1
 		{
@@ -639,6 +636,7 @@ int sem_take(sem_pt sid)
 void sem_timer()
 {
 	int ret_val = 0;
+	if (sem_list != NULL)
 	{
 		for (int j = 1; j < SID; j++) //sem ID starting from 1
 		{
@@ -673,6 +671,7 @@ void sem_timer()
 			}
 		}
 	}
+	
 	//return ret_val > 0 ? 0 : 2;
 }
 
@@ -696,16 +695,16 @@ void multi_time_checker()
 
 
 
-int msgq_create(msgq_pt *msid, unsigned int msgsize,unsigned int maxcount) //for noting
+int msgq_create(msgq_pt *msid, unsigned int msgsize,unsigned int maxcount) 
 {
 	*msid = MSID;
 	if (msgq_list == NULL)
 	{
-		msgq_list = (Msgq*)malloc(MSID * 2, sizeof(Msgq));
+		msgq_list = (Msgq*)malloc((MSID * 2)* sizeof(Msgq));
 	}
 	else
 	{
-		msgq_list = (Msgq*)realloc(msgq_list, MSID * 2);
+		msgq_list = (Msgq*)realloc(msgq_list, MSID * 2*sizeof(Msgq));
 	}
 	if (msgq_list == NULL)
 	{
@@ -731,7 +730,7 @@ int msgq_create(msgq_pt *msid, unsigned int msgsize,unsigned int maxcount) //for
 			for (int i = 0; i < maxcount; i++)
 			{
 				
-				msgq_list[*msid].Message_Queue[i].message = (char*)calloc(msgsize, sizeof(char));
+				msgq_list[*msid].Message_Queue[i].message = (char*)calloc(msgsize,sizeof(char));
 				if (msgq_list[*msid].Message_Queue[i].message == NULL)
 				{
 					return -1;
@@ -808,6 +807,7 @@ int msgq_receive(msgq_pt msid, unsigned char* message)
 	if (msgq_list[msid].counter > 0)
 	{
 		get_message_from_MQ(msid, message);
+		msgq_list[msid].counter --;
 		return 2;
 	}
 	else

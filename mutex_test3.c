@@ -141,6 +141,7 @@ L_3_2:
 }
 
 extern Mutex* mutex_list;
+extern Msgq* msgq_list;
 
 void main()
 {
@@ -156,7 +157,7 @@ void main()
 	//mutex_create(&mutex4);
 	msgq_create(&msgq1,20,10);
 
-	if (mutex_list[1].flag == -1)
+	if (msgq_list[1].Message_Queue[0].message[0] == 1)
 	{
 		printf("ok");
 	}
