@@ -78,7 +78,7 @@ int push_msgq_task_into_WQ(unsigned char tid, unsigned char p, msgq_pt msid, Msg
 		task_state[tid] = Blocked;
 		//printf("task_state[tid][act_counter[tid]] = %d \n", task_state[tid]);
 		msgq[msid].msgqQ[msgq[msid].Rear].tid = tid;
-		task_dyn_info[tid].dyn_prio = p;
+		task_dyn_info[msgq[msid].msgqQ[msgq[msid].Rear].tid].dyn_prio = p;
 
 		msgq[msid].Rear = (WAITQ_SIZE + 1 + msgq[msid].Rear) % WAITQ_SIZE;
 		if ((msgq[msid].Rear-msgq[msid].Front+WAITQ_SIZE)%WAITQ_SIZE > 1)//More than one element, sorting
@@ -106,6 +106,9 @@ int get_msgq_task_from_WQ(unsigned char* tid, unsigned char* prio, msgq_pt msid,
 
 	*tid = msgq[msid].msgqQ[msgq[msid].Front].tid;
 	*prio = task_dyn_info[*tid].dyn_prio;
+
+	msgq[msid].msgqQ[msgq[msid].Front].tid = 0;
+	task_dyn_info[msgq[msid].msgqQ[msgq[msid].Front].tid].dyn_prio = 0;
 
 	msgq[msid].Front = (msgq[msid].Front + 1) % WAITQ_SIZE;
 	return 0;
@@ -141,7 +144,7 @@ void get_msgq_task_from_WQ_position(unsigned char* tid, unsigned char* prio, msg
 
 
 		msgq[msid].msgqQ[task_loc].tid = 0; //
-		//msgq[msid].msgqQ[task_loc].prio = 0;
+		task_dyn_info[msgq[msid].msgqQ[task_loc].tid].dyn_prio = 0;
 		//
 
 		if (msgq[msid].Front == task_loc)

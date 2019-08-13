@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="testcase">
+      <UniqueIdentifier>{04caed00-da46-44c3-861b-43fb93c6fbcf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h">
@@ -78,7 +81,7 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="msgq_test.c">
-      <Filter>소스 파일</Filter>
+      <Filter>testcase</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

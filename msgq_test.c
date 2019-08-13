@@ -31,23 +31,27 @@ msgq_pt m1;
 	}\
 }
 
+char buf[10];
+
 //extern int msgq_send(msgq_pt msid, char * buf);
 ;
 void TASK(1)
 {
-	static char buf[10] = "hehe";
+	
 	JUMP_1();
 L_1_0:
 	
 	printf("task1 locking mutex\n\n");
 	current_pc[1]++;
-	flag = msgq_send(m1,buf);
+	
+	flag = msgq_receive(m1,buf);
 	if (!flag)
 		scheduler();
 		return;
 L_1_1:
 	printf(" Task1 Termiante\n\n");
 	current_pc[1] = 0;
+	//printf("%s", buf);
 	flag = TerminateTask();
 	if (!flag)
 		scheduler();
@@ -98,16 +102,17 @@ L_1_1:
 	}\
 }
 
-char buf1[10];
+
 void TASK(2)
 {
-	
+
 	JUMP_2();
 	
 L_2_0:
 
 	
 	printf("task2 create task1\n\n");
+	char buf1[10] = "haha";
 	current_pc[2]++;
 	flag = task_create(1);
 	if (flag)
@@ -116,12 +121,13 @@ L_2_0:
 L_2_1:
 	printf("task2 locking mutex\n\n");
 	current_pc[2]++;
-	flag = msgq_receive(m1, buf1);
+	flag = msgq_send(m1, buf1);
 	if (!flag)
 		scheduler();
 	return;
 L_2_2:
 	printf("Task2 Terminate\n\n");
+	//printf("%s", buf1);
 	current_pc[2] = 0;
 	flag = TerminateTask();
 	if (!flag)

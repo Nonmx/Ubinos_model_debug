@@ -110,6 +110,10 @@ int get_sem_task_from_WQ(unsigned char* tid, unsigned char* prio, sem_pt sid, Se
 	*tid = sem[sid].semQ[sem[sid].Front].tid;
 	*prio = task_dyn_info[sem[sid].semQ[sem[sid].Front].tid].dyn_prio;
 
+
+	sem[sid].semQ[sem[sid].Front].tid = 0;
+	task_dyn_info[sem[sid].semQ[sem[sid].Front].tid].dyn_prio = 0;
+
 	sem[sid].Front = (sem[sid].Front + 1) % WAITQ_SIZE;
 	return 0;
 
@@ -143,7 +147,7 @@ void get_sem_task_from_WQ_position(unsigned char* tid, unsigned char* prio, sem_
 
 
 		sem[sid].semQ[task_loc].tid = 0; //
-		//sem[sid].semQ[task_loc].prio = 0;
+		task_dyn_info[sem[sid].semQ[task_loc].tid].dyn_prio = 0;
 		//
 
 		if (sem[sid].Front == task_loc)

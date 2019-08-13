@@ -3,58 +3,57 @@
 #include <stdio.h>
 #include "ubinos.h"
 
-extern Msgq* msgq_list;
-int F = 0;
-int R = 0;
 
-int MQ_empty()
+
+
+int MQ_empty(msgq_pt msid, Msgq* msgq)
 {
-	if (F == R)
+	if (msgq[msid].F == msgq[msid].R)
 		return 1;//empty
 	else
 		return 0;//nonempty
 }
 
-int MQ_full()
+int MQ_full(msgq_pt msid, Msgq* msgq)
 {
-	if ((R + 1) % (messageQ_SIZE + 1) == F)
+	if ((msgq[msid].R + 1+ msgq[msid].maxcounter) % msgq[msid].maxcounter == msgq[msid].F)
 		return 1;
 	else
 		return 0;
 }
 
-int push_message_into_MQ(msgq_pt msgq, unsigned char* message)
+int push_message_into_MQ(msgq_pt msid, unsigned char* message,Msgq* msgq)
 {
-	if (MQ_full())
+	if (MQ_full(msid,msgq))
 	{
 		printf("messageQ is full!\n\n");
 		return -1;
 	}
 	else
 	{
-		memcpy(msgq_list[msgq].Message_Queue, message, sizeof(char));
+		memcpy(msgq[msid].Message_Queue, message, sizeof(message)/sizeof(char));
 
-		R = (messageQ_SIZE + R + 1) % messageQ_SIZE;
+		msgq[msid].R = (msgq[msid].maxcounter + msgq[msid].R + 1) % msgq[msid].maxcounter;
 
-		return 1;
+		return 0;
 	}
 }
 
-int get_message_from_MQ(msgq_pt msgq, unsigned char* message)
+int get_message_from_MQ(msgq_pt msid, unsigned char* message, Msgq* msgq)
 {
 	//	printf("mess is %s \n\n", Message_Queue->messgae);
-	if (MQ_empty())
+	if (MQ_empty(msid,msgq))
 	{
 		printf("messageQ is empty\n\n");
-		return 0;
+		return -1;
 	}
 	else
 	{
-		memcpy(message, msgq_list[msgq].Message_Queue ,sizeof(char));
+		memcpy(message, msgq[msid].Message_Queue ,sizeof(message)/sizeof(char));
 
 		//printf("mess is %s \n\n", message);
-		F = (F + 1) % messageQ_SIZE;
-		return 1;
+		msgq[msid].F = (msgq[msid].F + 1) % msgq[msid].maxcounter;
+		return 0;
 	}
 }
 

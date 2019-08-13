@@ -522,7 +522,6 @@ void mutex_timer()
 						//ret_val++;
 					}
 
-
 				}
 			}
 		}
@@ -745,28 +744,10 @@ int msgq_create(msgq_pt *msid, unsigned int msgsize,unsigned int maxcount)
 		
 	}
 }
-/*
-int messgae_write(unsigned char* message, msgq_pt msid, unsigned char tid)
-{
-	if (message == NULL)
-	{
-		return -1;//fait at cirbuf_write
-	}
-	else
-	{
-		unsigned char* temp_message_buf;
-
-		for (int i = 0; i < msgq_list[msid].msgsize; i++)
-		{
-			msgq_list[msid].MESSAGE[tid].message[i] = message[i];
-			return 0;
-		}
-	}
-}
-*/
 
 
-int msgq_send(msgq_pt msid, static unsigned char* message)
+
+int msgq_send(msgq_pt msid, static unsigned char *message)
 {
 
 	//API_Call_Suporter(API_msgq_send);
@@ -786,12 +767,13 @@ int msgq_send(msgq_pt msid, static unsigned char* message)
 			//push_message_into_MQ(msid, message);
 			//msgq_list[msid].counter++;
 			push_task_into_readyQ(temp_tid, temp_prio, current_pc[current_tid]);
-			memcpy(msgq_list[msid].owner[temp_tid].buf, message, sizeof(char));
+			memcpy(msgq_list[msid].owner[temp_tid].buf, message, sizeof(message)/sizeof(char));
 			return 0;
 		}
 		else
 		{
-			push_message_into_MQ(msid,message);
+			push_message_into_MQ(msid,message,msgq_list);
+			msgq_list[msid].counter++;
 			return 2;
 		}
 	}
@@ -804,26 +786,26 @@ int msgq_receive(msgq_pt msid, static unsigned char* message)
 	API_Call_Suporter(API_msgq_receive);
 	if (msgq_list[msid].counter > 0)
 	{
-		get_message_from_MQ(msid, message);
+		get_message_from_MQ(msid, message,msgq_list);
 		msgq_list[msid].counter --;
 		return 2;
 	}
 	else
 	{
 		//messgae_write(message, msid,current_tid);//task->wtask_p->msg
-		msgq_list[msid].owner[current_tid].buf = &message;
+		msgq_list[msid].owner[current_tid].buf = message;
 		push_msgq_task_into_WQ(current_tid, current_prio, msid,msgq_list);
 		return 0;
 	}
 }
 
-int msgq_delete(msgq_pt msid)
+int msgq_delete(msgq_pt *msid)
 {
-	msgq_list[msid].flag = -1;
-	msgq_list[msid].Front = -1;
-	msgq_list[msid].Rear = -1;
+	msgq_list[*msid].flag = -1;
+	msgq_list[*msid].Front = -1;
+	msgq_list[*msid].Rear = -1;
 	
-	free(msgq_list[msid].Message_Queue);
+	free(msgq_list[*msid].Message_Queue);
 
 	return 0;
 }

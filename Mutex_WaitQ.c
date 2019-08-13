@@ -81,6 +81,7 @@ int push_mutex_task_into_WQ(unsigned char tid, unsigned char p, mutex_pt mid,Mut
 		task_state[tid] = Blocked;
 		//printf("task_state[tid][act_counter[tid]] = %d \n", task_state[tid]);
 		mutex[mid].mutexQ[mutex[mid].Rear].tid = tid;
+		task_dyn_info[mutex[mid].mutexQ[mutex[mid].Rear].tid].dyn_prio = p;
 		//mutex[mid].mutexQ[mutex[mid].Rear].prio = p;
 
 		mutex[mid].Rear = (WAITQ_SIZE + 1 + mutex[mid].Rear) % WAITQ_SIZE;
@@ -116,6 +117,10 @@ int get_mutex_task_from_WQ(unsigned char* tid, unsigned char* prio, mutex_pt mid
 	*tid = mutex[mid].mutexQ[mutex[mid].Front].tid;
 	*prio = task_dyn_info[mutex[mid].mutexQ[mutex[mid].Front].tid].dyn_prio;
 
+	mutex[mid].mutexQ[mutex[mid].Front].tid = 0;
+	task_dyn_info[mutex[mid].mutexQ[mutex[mid].Front].tid].dyn_prio = 0;
+
+
 	mutex[mid].Front = (mutex[mid].Front + 1) % WAITQ_SIZE;
 	return 0;
 
@@ -150,7 +155,7 @@ void get_mutex_task_from_WQ_position(unsigned char* tid, unsigned char* prio,mut
 
 
 		mutex[mid].mutexQ[task_loc].tid = 0; //
-		//mutex[mid].mutexQ[task_loc].prio = 0;
+		task_dyn_info[mutex[mid].mutexQ[task_loc].tid].dyn_prio = 0;
 		//
 
 

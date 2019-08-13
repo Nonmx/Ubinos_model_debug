@@ -168,9 +168,12 @@ typedef struct {
 	//char* buf;
 	int Front;
 	int Rear;
-	message MESSAGE[NUM_OF_TASKS];
 	WQ msgqQ[WAITQ_SIZE];
+	
 
+	int F;
+	int R;
+	message MESSAGE[NUM_OF_TASKS];
 	MQ *Message_Queue;
 }Msgq;
 
