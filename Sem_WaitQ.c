@@ -40,7 +40,7 @@ int Find_sem_Btask(int* task_loc, int tid, sem_pt sid, Sem* sem) //use for mutex
 void semQ_sort(sem_pt sid, Sem* sem)
 {
 	unsigned char temp_tid;
-	unsigned char temp_prio;
+	//unsigned char temp_prio;
 	int i = 0;
 	int j = 0;
 
@@ -51,7 +51,7 @@ void semQ_sort(sem_pt sid, Sem* sem)
 		{
 			if (task_dyn_info[sem[sid].semQ[tp_front].tid].dyn_prio < task_dyn_info[sem[sid].semQ[tp_front+1].tid].dyn_prio)
 			{
-				temp_tid = sem[sid].semQ[tp_front+1].tid;
+				temp_tid = sem[sid].semQ[tp_front].tid;
 				//temp_prio = sem[sid].semQ[tp_front+1].prio;
 
 				sem[sid].semQ[tp_front].tid = sem[sid].semQ[tp_front+1].tid;
@@ -142,7 +142,7 @@ void get_sem_task_from_WQ_position(unsigned char* tid, unsigned char* prio, sem_
 	else {
 		//printf("deQ -> get_task_from_WQ ->front : %d\n\n", Front);
 		*tid = sem[sid].semQ[task_loc].tid;
-		*prio = task_dyn_info[sem[sid].semQ[sem[sid].Front].tid].dyn_prio;
+		*prio = task_dyn_info[sem[sid].semQ[task_loc].tid].dyn_prio;
 
 
 

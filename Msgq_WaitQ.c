@@ -40,7 +40,7 @@ int Find_msgq_Btask(int* task_loc, int tid, msgq_pt msid, Msgq* msgq) //use for 
 void msgqQ_sort(msgq_pt msid, Msgq* msgq)
 {
 	unsigned char temp_tid;
-	unsigned char temp_prio;
+	//'unsigned char temp_prio;
 	int i = 0;
 	int j = 0;
 	for (i = 0; i < (msgq[msid].Rear - msgq[msid].Front + WAITQ_SIZE)%WAITQ_SIZE; i++)
@@ -48,9 +48,9 @@ void msgqQ_sort(msgq_pt msid, Msgq* msgq)
 		int tp_front = msgq[msid].Front;
 		for (j = 0; j < ((msgq[msid].Rear-msgq[msid].Front+WAITQ_SIZE)%WAITQ_SIZE) - i; j++)
 		{
-			if (task_dyn_info[msgq[msid].msgqQ[tp_front].tid].dyn_prio < task_dyn_info[msgq[msid].msgqQ[tp_front].tid].dyn_prio)
+			if (task_dyn_info[msgq[msid].msgqQ[tp_front].tid].dyn_prio < task_dyn_info[msgq[msid].msgqQ[tp_front+1].tid].dyn_prio)
 			{
-				temp_tid = msgq[msid].msgqQ[tp_front+1].tid;
+				temp_tid = msgq[msid].msgqQ[tp_front].tid;
 			//	temp_prio = msgq[msid].msgqQ[tp_front + 1].prio;
 
 				msgq[msid].msgqQ[tp_front].tid = msgq[msid].msgqQ[tp_front+1].tid;

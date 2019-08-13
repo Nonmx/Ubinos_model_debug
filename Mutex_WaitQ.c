@@ -51,7 +51,7 @@ void mutexQ_sort(mutex_pt mid, Mutex * mutex)
 		{
 			if (task_dyn_info[mutex[mid].mutexQ[tp_front].tid].dyn_prio < task_dyn_info[mutex[mid].mutexQ[tp_front+1].tid].dyn_prio)
 			{
-				temp_tid = mutex[mid].mutexQ[tp_front+1].tid;
+				temp_tid = mutex[mid].mutexQ[tp_front].tid;
 				//temp_prio = mutex[mid].mutexQ[j+1].prio;
 
 				mutex[mid].mutexQ[tp_front].tid = mutex[mid].mutexQ[tp_front+1].tid;
@@ -149,7 +149,7 @@ void get_mutex_task_from_WQ_position(unsigned char* tid, unsigned char* prio,mut
 	else {
 		//printf("deQ -> get_task_from_WQ ->front : %d\n\n", Front);
 		*tid = mutex[mid].mutexQ[task_loc].tid;
-		*prio = task_dyn_info[mutex[mid].mutexQ[mutex[mid].Front].tid].dyn_prio;
+		*prio = task_dyn_info[mutex[mid].mutexQ[task_loc].tid].dyn_prio;
 		//assert(mutex->mutexQ[pri_loc][task_loc].timed_flag > 0);
 		//mutex->mutexQ[pri_loc][task_loc].timed_flag--;
 

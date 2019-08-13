@@ -272,7 +272,7 @@ int mutex_lock(mutex_pt mid)
 			{
 				mutex_list[mid].form_readyQ = 1;
 				get_task_from_readyQ_position(&temp_tid, &temp_prio, mid, mutex_list, loc);
-				//task_dyn_info[temp_tid].dyn_prio = ; 
+				task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio; 
 				push_task_into_readyQ(temp_tid, task_dyn_info[current_tid].dyn_prio, current_pc[temp_tid]);// priority inheritance
 				return 0;
 			}
@@ -282,7 +282,7 @@ int mutex_lock(mutex_pt mid)
 				if (sleep_loc != -1)
 				{
 					mutex_list[mid].form_sleepQ = 1;
-					//task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
+					task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
 					sleep_prio_change(mutex_list[mid].owner, task_dyn_info[current_tid].dyn_prio, sleep_loc);
 					return 0;
 				}
@@ -292,7 +292,7 @@ int mutex_lock(mutex_pt mid)
 					if (mutex_loc != -1)
 					{
 						mutex_list[mid].form_mutexQ = 1;
-						//task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
+						task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
 						mutex_prio_change(mutex_list[mid].owner, task_dyn_info[current_tid].dyn_prio, temp_mutex_obj_num, mutex_list, mutex_loc);
 
 						return 0;
@@ -303,7 +303,7 @@ int mutex_lock(mutex_pt mid)
 						if (sem_loc != -1)
 						{
 							mutex_list[mid].form_semQ = 1;
-							//task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
+							task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
 							sem_prio_change(mutex_list[mid].owner, task_dyn_info[current_tid].dyn_prio, temp_sem_obj_num, sem_list, sem_loc);
 							return 0;
 						}
@@ -313,7 +313,7 @@ int mutex_lock(mutex_pt mid)
 							if (msgq_loc != -1)
 							{
 								mutex_list[mid].form_msgqQ++;
-								//task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
+								task_dyn_info[temp_tid].dyn_prio = task_dyn_info[current_tid].dyn_prio;
 								msgq_prio_change(mutex_list[mid].owner, task_dyn_info[current_tid].dyn_prio, temp_msgq_obj_num, msgq_list, msgq_loc);
 								return 0;
 							}

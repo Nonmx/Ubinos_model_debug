@@ -1,7 +1,7 @@
 #include "messageQ.h"
-#include "kernel.h"
 #include <stdio.h>
-#include "ubinos.h"
+//#include "ubinos.h"
+#include <string.h>
 
 
 
@@ -31,7 +31,7 @@ int push_message_into_MQ(msgq_pt msid, unsigned char* message,Msgq* msgq)
 	}
 	else
 	{
-		memcpy(msgq[msid].Message_Queue, message, sizeof(message)/sizeof(char));
+		memcpy(msgq[msid].Message_Queue[msgq[msid].R].message, message, sizeof(message)/sizeof(char));
 
 		msgq[msid].R = (msgq[msid].maxcounter + msgq[msid].R + 1) % msgq[msid].maxcounter;
 
@@ -49,7 +49,7 @@ int get_message_from_MQ(msgq_pt msid, unsigned char* message, Msgq* msgq)
 	}
 	else
 	{
-		memcpy(message, msgq[msid].Message_Queue ,sizeof(message)/sizeof(char));
+		memcpy(message, msgq[msid].Message_Queue[msgq[msid].F].message ,sizeof(msgq[msid].Message_Queue[msgq[msid].F].message)/sizeof(char));
 
 		//printf("mess is %s \n\n", message);
 		msgq[msid].F = (msgq[msid].F + 1) % msgq[msid].maxcounter;
