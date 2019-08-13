@@ -20,7 +20,7 @@ void initialize() {
 	task_static_info[3].prio = 3;
 
 	task_static_info[4].max_act_cnt = 1;
-	task_static_info[4].prio = 4;
+	task_static_info[4].prio = 3;
 
 
 

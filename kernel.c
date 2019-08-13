@@ -208,12 +208,13 @@ int mutex_create(mutex_pt* mutex)
 		mutex_list[*mutex].form_sleepQ = -1;
 		mutex_list[*mutex].form_semQ = -1;
 		mutex_list[*mutex].form_msgqQ = -1;
-		mutex_list[*mutex].mutex_flag = -1;
+		//mutex_list[*mutex].mutex_flag = -1;
 
 
 		for (int i = 0; i < NUM_OF_TASKS; i++)
 		{
 			mutex_list[*mutex].mutex_timed_info[i] = -1;
+			mutex_list[*mutex].mutex_timed_flag[i] = -1;
 		}
 
 		MID++;
@@ -227,7 +228,7 @@ int mutex_create(mutex_pt* mutex)
 int loc;//task location
 int mutex_lock(mutex_pt mid)
 {
-	API_Call_Suporter(API_mutex_lock);
+	
 
 	mutex_list[mid].lock_call[current_tid] = 1;
 
@@ -249,6 +250,7 @@ int mutex_lock(mutex_pt mid)
 	}
 	else
 	{
+		API_Call_Suporter(API_mutex_lock);
 		if (task_dyn_info[mutex_list[mid].owner].dyn_prio < task_dyn_info[current_tid].dyn_prio)
 		{
 			unsigned char temp_tid = 0;
@@ -364,7 +366,6 @@ int mutex_unlock(mutex_pt mid)
 				assert(temp_tid == mutex_list[mid].owner);
 				task_dyn_info[temp_tid].dyn_prio = task_static_info[mutex_list[mid].owner].prio;
 				push_task_into_readyQ(temp_tid, task_dyn_info[temp_tid].dyn_prio, current_pc[temp_tid]);
-				return 2;
 			}
 			else if (current_tid == mutex_list[mid].owner)
 			{
@@ -477,7 +478,7 @@ int mutex_delete(mutex_pt *mid)
 	mutex_list[*mid].form_mutexQ = -1;
 	mutex_list[*mid].form_sleepQ = -1;
 	mutex_list[*mid].form_semQ = -1;
-	mutex_list[*mid].mutex_flag = -1;
+	//mutex_list[*mid].mutex_flag = -1;
 
 	
 	return 0;
@@ -493,37 +494,122 @@ void mutex_timer()
 	{
 		for (int j = 1; j < MID; j++) //mutex ID starting from 1
 		{
-			if (mutex_list[j].mutex_flag == 0)//If the lock fails, the associated mutex id is found and the timer starts
-			{
 				for (int i = 1; i < NUM_OF_TASKS; i++) //Tid starting form 1
 				{
-					if (task_state[mutex_list[j].mutex_timed_info[i]] == Ready)
+					if (mutex_list[j].mutex_timed_flag[i] == 0)//If the lock fails, the associated mutex id is found and the timer starts
 					{
-						mutex_list[j].mutex_timed_info[i] = -1; //The unlock API has been called
-						//printf("Task[%d] is put into readyQ via unblockAPI", i);
-					}
-					if (mutex_list[j].mutex_timed_info[i] > 0)
-					{
-						mutex_list[j].mutex_timed_info[i]--;
-						//ret_val++; //keep going
-					}
-					else if (mutex_list[j].mutex_timed_info[i] == 0)
-					{
-						unsigned char temp_tid;
-						unsigned char temp_prio;
-						int task_loc;
-						if (Find_mutex_Btask(&task_loc, i, j, mutex_list) == -1)//find related task
-
+						if (task_state[mutex_list[j].mutex_timed_info[i]] == Ready)
 						{
-							assert(0); //not find task, bug!
+							mutex_list[j].mutex_timed_info[i] = -1; //The unlock API has been called
+							//printf("Task[%d] is put into readyQ via unblockAPI", i);
 						}
-						get_mutex_task_from_WQ_position(&temp_tid,&temp_prio,j,mutex_list,task_loc);//get fromt wq
-						push_task_into_readyQ(temp_tid,temp_prio,current_pc[temp_tid]);//push
-						//ret_val++;
+						if (mutex_list[j].mutex_timed_info[i] > 0)
+						{
+							mutex_list[j].mutex_timed_info[i]--;
+							//ret_val++; //keep going
+						}
+						else if (mutex_list[j].mutex_timed_info[i] == 0)
+						{
+							unsigned char temp_tid;
+							unsigned char temp_prio;
+
+							int sleep_loc;
+							int mutex_loc;
+							int sem_loc;
+							int msgq_loc;
+
+							unsigned int temp_mutex_obj_num;
+							unsigned int temp_sem_obj_num;
+							unsigned int temp_msgq_obj_num;
+
+							int task_loc;
+
+							if (Find_mutex_Btask(&task_loc, i, j, mutex_list) == -1)//find related task
+
+							{
+								assert(0); //not find task, bug!
+							}
+							mutex_list[j].mutex_timed_info[i] = -1; //time initialize
+							get_mutex_task_from_WQ_position(&temp_tid, &temp_prio, j, mutex_list, task_loc);//get fromt wq
+							mutex_list[j].mutex_timed_flag[i] = -1;
+							push_task_into_readyQ(temp_tid, temp_prio, current_pc[temp_tid]);//push
+
+							if (mutex_list[j].tra_flag > 0) // priority 북구
+							{
+								if (current_tid != mutex_list[j].owner && task_state[mutex_list[j].owner] == Ready)
+								{
+									loc = find_task_readyQ(mutex_list[j].owner, task_dyn_info[mutex_list[j].owner].dyn_prio);
+									get_task_from_readyQ_position(&temp_tid, &temp_prio, j, mutex_list, loc);
+									assert(temp_tid == mutex_list[j].owner);
+									task_dyn_info[temp_tid].dyn_prio = task_static_info[mutex_list[j].owner].prio;
+									push_task_into_readyQ(temp_tid, task_dyn_info[temp_tid].dyn_prio, current_pc[temp_tid]);
+								}
+								else if (current_tid == mutex_list[j].owner)
+								{
+									if (mutex_list[j].form_readyQ > 0)
+									{
+										mutex_list[j].form_readyQ--;
+										mutex_list[j].tra_flag--;
+
+										task_dyn_info[mutex_list[j].owner].dyn_prio = task_static_info[mutex_list[j].owner].prio;
+										push_task_into_readyQ(mutex_list[j].owner, task_dyn_info[mutex_list[j].owner].dyn_prio, current_pc[mutex_list[j].owner]);
+									}
+								}
+								else {
+
+									if (mutex_list[j].form_mutexQ > 0 || mutex_list[j].form_semQ > 0 || mutex_list[j].form_sleepQ > 0 || mutex_list[j].form_msgqQ) //mutexQ
+									{
+										mutex_loc = find_task_mutexQ(mutex_list[j].owner, mutex_list, &temp_mutex_obj_num);
+										if (mutex_loc != -1)
+										{
+											mutex_list[j].form_mutexQ--;
+											mutex_list[j].tra_flag--;
+											task_dyn_info[mutex_list[j].owner].dyn_prio = task_static_info[mutex_list[j].owner].prio;
+											mutex_prio_change(mutex_list[j].owner, task_dyn_info[mutex_list[j].owner].dyn_prio, temp_mutex_obj_num, mutex_list, mutex_loc);
+										}
+										else
+										{
+											sleep_loc = find_task_sleepQ(mutex_list[j].owner);
+											if (sleep_loc != -1)
+											{
+												mutex_list[j].form_sleepQ--;
+												mutex_list[j].tra_flag--;
+												task_dyn_info[mutex_list[j].owner].dyn_prio = task_static_info[mutex_list[j].owner].prio;
+												sleep_prio_change(mutex_list[j].owner, task_dyn_info[mutex_list[j].owner].dyn_prio, sleep_loc);
+											}
+											else
+											{
+												sem_loc = find_task_semQ(mutex_list[j].owner, sem_list, &temp_sem_obj_num);
+												if (sem_loc != -1)
+												{
+													mutex_list[j].form_semQ--;
+													mutex_list[j].tra_flag--;
+													task_dyn_info[mutex_list[j].owner].dyn_prio = task_static_info[mutex_list[j].owner].prio;
+													sem_prio_change(mutex_list[j].owner, task_dyn_info[mutex_list[j].owner].dyn_prio, temp_sem_obj_num, sem_list, sem_loc);
+												}
+												else
+												{
+													msgq_loc = find_task_msgqWQ(mutex_list[j].owner, msgq_list, &temp_msgq_obj_num);
+													if (msgq_loc != -1)
+													{
+														mutex_list[j].form_msgqQ++;
+														task_dyn_info[mutex_list[j].owner].dyn_prio = task_dyn_info[current_tid].dyn_prio;
+														msgq_prio_change(mutex_list[j].owner, task_dyn_info[mutex_list[j].owner].dyn_prio, temp_msgq_obj_num, msgq_list, msgq_loc);
+													}
+													else
+														return -1;
+												}
+											}
+										}
+									}
+								}
+							}
+							//ret_val++;
+						}
 					}
 
 				}
-			}
+			
 		}
 	}
 }
@@ -533,10 +619,10 @@ void mutex_timer()
 
 int mutex_lock_timed(mutex_pt mid, unsigned int time)
 {
-	API_Call_Suporter(API_mutex_lock_timed);
-	mutex_list[mid].mutex_timed_info[current_tid] = time+1;
-	mutex_list[mid].mutex_flag = mutex_lock(mid);
-	return mutex_list[mid].mutex_flag;
+	//API_Call_Suporter(API_mutex_lock_timed);
+	mutex_list[mid].mutex_timed_info[current_tid] = time;
+	mutex_list[mid].mutex_timed_flag[current_tid] = mutex_lock(mid);
+	return 0;
 }
 
 
@@ -561,11 +647,12 @@ int sem_create(sem_pt *sid)
 		sem_list[*sid].Front = 0;
 		sem_list[*sid].Rear = 0;
 		sem_list[*size].counter = 0;
-		sem_list[*size].sem_flag = -1;
+		//sem_list[*size].sem_flag = -1;
 		
 		for (int i = 0; i < NUM_OF_TASKS; i++)
 		{
 			sem_list[*sid].sem_timed_info[i] = -1;
+			sem_list[*size].sem_timed_flag[i] = -1;
 		}
 
 		SID++;
@@ -583,7 +670,7 @@ int sem_delete(sem_pt *sid)
 	sem_list[*sid].Rear = -1;
 	sem_list[*sid].counter = -1;
 	//sem_list[*size].sem_mutex_owner = -1;
-	sem_list[*sid].sem_flag = -1;
+	//sem_list[*sid].sem_flag = -1;
 
 
 	
@@ -595,8 +682,6 @@ int sem_give(sem_pt sid)
 {
 	unsigned char temp_tid;
 	unsigned char temp_prio;
-
-
 
 	if (SEM_WQ_EMPTY(sid,sem_list))
 	{
@@ -617,7 +702,7 @@ int sem_give(sem_pt sid)
 int sem_take(sem_pt sid)
 {
 	
-	API_Call_Suporter(API_sem_take);
+	
 	if (sem_list[sid].counter > 0)
 	{
 		sem_list[sid].counter = sem_list[sid].counter - 1;
@@ -626,7 +711,7 @@ int sem_take(sem_pt sid)
 	}
 	else
 	{
-
+		API_Call_Suporter(API_sem_take);
 		push_sem_task_into_WQ(current_tid, current_prio,sid,sem_list);
 		return 0;
 	}
@@ -639,35 +724,39 @@ void sem_timer()
 	{
 		for (int j = 1; j < SID; j++) //sem ID starting from 1
 		{
-			if (sem_list[j].sem_flag == 0)//If the take fails, the associated sem id is found and the timer starts
-			{
+			
 				for (int i = 1; i < NUM_OF_TASKS; i++) //Tid starting form 1
 				{
-					if (task_state[sem_list[j].sem_timed_info[i]] == Ready)
+					if (sem_list[j].sem_timed_flag[i] == 0)//If the take fails, the associated sem id is found and the timer starts
 					{
-						sem_list[j].sem_timed_info[i] = -1; //The give API has been called
-						//printf("Task[%d] is put into readyQ via Semgive API", i);
-					}
-					if (sem_list[j].sem_timed_info[i] > 0)
-					{
-						sem_list[j].sem_timed_info[i]--;
-						//ret_val++; //keep going
-					}
-					else if (sem_list[j].sem_timed_info[i] == 0)
-					{
-						unsigned char temp_tid;
-						unsigned char temp_prio;
-						int task_loc;
-						if (Find_sem_Btask(&task_loc, i, j, sem_list) == -1)//find related task
+						if (task_state[sem_list[j].sem_timed_info[i]] == Ready)
 						{
-							assert(0); //not find task, bug!
+							sem_list[j].sem_timed_info[i] = -1; //The give API has been called
+							//printf("Task[%d] is put into readyQ via Semgive API", i);
 						}
-						get_sem_task_from_WQ_position(&temp_tid, &temp_prio, j, sem_list, task_loc);//get from wq
-						push_task_into_readyQ(temp_tid, temp_prio, current_pc[temp_tid]);//push
-						//ret_val++;
+						if (sem_list[j].sem_timed_info[i] > 0)
+						{
+							sem_list[j].sem_timed_info[i]--;
+							//ret_val++; //keep going
+						}
+						else if (sem_list[j].sem_timed_info[i] == 0)
+						{
+							unsigned char temp_tid;
+							unsigned char temp_prio;
+							int task_loc;
+							if (Find_sem_Btask(&task_loc, i, j, sem_list) == -1)//find related task
+							{
+								assert(0); //not find task, bug!
+							}
+							sem_list[j].sem_timed_info[i] = -1;
+							get_sem_task_from_WQ_position(&temp_tid, &temp_prio, j, sem_list, task_loc);//get from wq
+							sem_list[j].sem_timed_flag[i] = -1;
+							push_task_into_readyQ(temp_tid, temp_prio, current_pc[temp_tid]);//push
+							//ret_val++;
+						}
 					}
 				}
-			}
+			
 		}
 	}
 	
@@ -676,10 +765,10 @@ void sem_timer()
 
 int sem_take_timed(sem_pt sid, int time)
 {
-	API_Call_Suporter(API_sem_take_timed);
+	//API_Call_Suporter(API_sem_take_timed);
 	sem_list[sid].sem_timed_info[current_tid] = time+1;
-	sem_list[sid].sem_flag = sem_take(sid);
-	return sem_list[sid].sem_flag;
+	sem_list[sid].sem_timed_flag[current_tid] = sem_take(sid);
+	return 0;
 }
 
 
@@ -695,7 +784,7 @@ void multi_time_checker()
 
 
 
-int msgq_create(msgq_pt *msid, unsigned int msgsize,unsigned int maxcount) 
+int msgq_create(msgq_pt *msid, unsigned int msgsize,int maxcount) 
 {
 
 	*msid = MSID;
@@ -718,6 +807,7 @@ int msgq_create(msgq_pt *msid, unsigned int msgsize,unsigned int maxcount)
 		msgq_list[*msid].Front = 0;
 		msgq_list[*msid].Rear = 0;
 		msgq_list[*msid].counter = 0;
+		msgq_list[*msid].maxcounter = 0;
 
 
 		msgq_list[*msid].Message_Queue = (MQ*)calloc(maxcount, sizeof(MQ));
@@ -747,12 +837,10 @@ int msgq_create(msgq_pt *msid, unsigned int msgsize,unsigned int maxcount)
 
 
 
-int msgq_send(msgq_pt msid, static unsigned char *message)
+int msgq_send(msgq_pt msid, unsigned char *message)
 {
 
 	//API_Call_Suporter(API_msgq_send);
-	int r;
-	unsigned char* temp_message_buf;
 	unsigned char temp_tid;
 	unsigned char temp_prio;
 
@@ -781,9 +869,9 @@ int msgq_send(msgq_pt msid, static unsigned char *message)
 
 
 
-int msgq_receive(msgq_pt msid, static unsigned char* message)
+int msgq_receive(msgq_pt msid,unsigned char* message)
 {
-	API_Call_Suporter(API_msgq_receive);
+	
 	if (msgq_list[msid].counter > 0)
 	{
 		get_message_from_MQ(msid, message,msgq_list);
@@ -792,6 +880,7 @@ int msgq_receive(msgq_pt msid, static unsigned char* message)
 	}
 	else
 	{
+		API_Call_Suporter(API_msgq_receive);
 		//messgae_write(message, msid,current_tid);//task->wtask_p->msg
 		msgq_list[msid].owner[current_tid].buf = message;
 		push_msgq_task_into_WQ(current_tid, current_prio, msid,msgq_list);
@@ -804,6 +893,7 @@ int msgq_delete(msgq_pt *msid)
 	msgq_list[*msid].flag = -1;
 	msgq_list[*msid].Front = -1;
 	msgq_list[*msid].Rear = -1;
+	msgq_list[*msid].maxcounter = -1;
 	
 	free(msgq_list[*msid].Message_Queue);
 

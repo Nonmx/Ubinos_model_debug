@@ -41,7 +41,7 @@ static __inline char Hava_to_RR()// readyQ???? ???????? task?? ????? priority???
 	int i = 0;
 	//for (i = 0; i < MAX_QUEUE_LENGTH; i++)
 
-	if (task_static_info[readyQ[current_prio][front[current_prio]].tid].prio == current_prio)
+	if (task_dyn_info[readyQ[current_prio][front[current_prio]].tid].dyn_prio == current_prio)
 		return 1;
 	else
 		return 0;

@@ -12,6 +12,9 @@ Mutex* mutex;
 int loc;
 void main()
 {
+
+
+
 	unsigned char tid;
 	unsigned char prio;
 	mutex = (Mutex*)malloc(2 * sizeof(Mutex*));

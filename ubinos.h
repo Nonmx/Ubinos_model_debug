@@ -117,7 +117,7 @@ typedef struct {
 	int form_mutexQ;
 	int form_msgqQ;
 	int mutex_timed_info[NUM_OF_TASKS+1];
-	int mutex_flag;
+	int mutex_timed_flag[NUM_OF_TASKS+1];
 
 	//mutex waitQ
 	int Front;
@@ -134,7 +134,7 @@ typedef struct {
 	unsigned int lock_call[NUM_OF_TASKS];
 	int sem_timed_info[NUM_OF_TASKS+1];
 	//unsigned char Lock; //locked?? task ????
-	int sem_flag;
+	int sem_timed_flag[NUM_OF_TASKS+1];
 	//sem waitQ
 
 	int Front;
@@ -163,7 +163,7 @@ typedef struct {
 	int flag;
 	int maxcounter;
 	int counter;
-	unsigned int msgsize;
+	int msgsize;
 	OWN owner[NUM_OF_TASKS];
 	//char* buf;
 	int Front;

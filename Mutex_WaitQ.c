@@ -41,7 +41,6 @@ int Find_mutex_Btask(int *task_loc, int tid,mutex_pt mid, Mutex* mutex) //use fo
 void mutexQ_sort(mutex_pt mid, Mutex * mutex)
 {
 	unsigned char temp_tid;
-	unsigned char temp_prio;
 	int i = 0;
 	int j = 0;
 	for (i = 0; i < (mutex[mid].Rear - mutex[mid].Front + WAITQ_SIZE)%WAITQ_SIZE; i++)

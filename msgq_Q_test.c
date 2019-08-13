@@ -7,7 +7,7 @@
 Msgq* msgq;
 
 
-void main()
+void smain()
 {
 	msgq = (Msgq*)malloc(2 * sizeof(Msgq));
 	msgq[1].maxcounter = 5;

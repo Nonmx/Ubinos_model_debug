@@ -39,6 +39,7 @@ void push_task_into_readyQ(unsigned char t, unsigned char p, int pc)
 	if (is_full(p)) //queue  is full
 	{
 		printf("Queue is full!\n");
+		//return -1;
 	}
 	else
 	{
@@ -57,6 +58,7 @@ void push_task_into_readyQ(unsigned char t, unsigned char p, int pc)
 		{
 			max_prio = p;
 		}
+		return 0;
 	}
 }
 
@@ -69,7 +71,7 @@ void get_task_from_readyQ(unsigned char* t, unsigned char* p)
 	if (is_empty() && !(is_sleeping()))
 	{
 		printf("Queue is empty\n");
-		current_tid = -1;
+		//current_tid = -1;
 	}
 	else if (is_empty() && is_sleeping())
 	{
@@ -194,7 +196,9 @@ int scheduler() {
 			return 0;
 	}
 	else
-	{
+
+		
+		{
 		if (task_dyn_info[current_tid].dyn_prio < max_prio)
 		{
 			push_task_into_readyQ(current_tid, task_dyn_info[current_tid].dyn_prio, current_pc[current_tid]);

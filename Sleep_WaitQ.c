@@ -26,8 +26,6 @@ int Sleep_Full()
 void sleepQ_sort()
 {
 	unsigned char temp_tid;
-
-	unsigned char temp_prio;
 	int temp_time;
 	
 	int i = 0;
