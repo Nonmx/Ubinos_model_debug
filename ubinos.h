@@ -131,7 +131,7 @@ typedef int mutex_pt;
 
 typedef struct {
 	int counter;
-	unsigned int lock_call[NUM_OF_TASKS];
+	//unsigned int lock_call[NUM_OF_TASKS];
 	int sem_timed_info[NUM_OF_TASKS+1];
 	//unsigned char Lock; //locked?? task ????
 	int sem_timed_flag[NUM_OF_TASKS+1];
@@ -149,10 +149,10 @@ typedef int sem_pt;
 typedef struct {
 	unsigned char *message;
 }MQ;
-typedef struct
+/*typedef struct
 {
 	unsigned char* message;
-}message;
+}message;*/
 
 
 typedef struct {
@@ -173,7 +173,7 @@ typedef struct {
 
 	int F;
 	int R;
-	message MESSAGE[NUM_OF_TASKS];
+	//message MESSAGE[NUM_OF_TASKS];
 	MQ *Message_Queue;
 }Msgq;
 

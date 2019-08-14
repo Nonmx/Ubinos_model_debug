@@ -15,6 +15,14 @@ void main()
 	unsigned char tid;
 	unsigned char prio;
 	sem = (Sem*)malloc(2 * sizeof(Sem*));
+
+	//memset(sem[1].semQ, -1, NUM_OF_TASKS+1 * sizeof(WQ));
+
+	for (int i = 0; i < NUM_OF_TASKS; i++)
+	{
+		sem[1].semQ[i].tid = 0;
+	}
+
 	push_sem_task_into_WQ(Task1, 1, 1, sem);
 	push_sem_task_into_WQ(Task2, 2, 1, sem);
 	push_sem_task_into_WQ(Task3, 3, 1, sem);

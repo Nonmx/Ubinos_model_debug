@@ -45,7 +45,7 @@ int sem_give(sem_pt);
 int sem_take_timed(sem_pt, int);
 
 //part of messahe Q
-int msgq_create(msgq_pt*, unsigned int, unsigned int);
+int msgq_create(msgq_pt*, unsigned int,int);
 int msgq_receive(msgq_pt, unsigned char*);
 int msgq_send(msgq_pt, unsigned char*);
 int msgq_delete(msgq_pt*);

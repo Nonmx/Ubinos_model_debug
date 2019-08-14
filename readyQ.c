@@ -58,7 +58,7 @@ void push_task_into_readyQ(unsigned char t, unsigned char p, int pc)
 		{
 			max_prio = p;
 		}
-		return 0;
+		//return 0;
 	}
 }
 

@@ -153,7 +153,7 @@ int task_sleep(unsigned int time)
 }
 
 
-int sleep_timer()//Wake up the task
+void sleep_timer()//Wake up the task
 {
 
 	for (int i = 0; i < NUM_OF_TASKS; i++)
@@ -215,6 +215,12 @@ int mutex_create(mutex_pt* mutex)
 		{
 			mutex_list[*mutex].mutex_timed_info[i] = -1;
 			mutex_list[*mutex].mutex_timed_flag[i] = -1;
+			
+		}
+
+		for (int i = 0; i < WAITQ_SIZE; i++)
+		{
+			mutex_list[*mutex].mutexQ[i].tid = 0;
 		}
 
 		MID++;
@@ -480,7 +486,7 @@ int mutex_delete(mutex_pt *mid)
 	mutex_list[*mid].form_semQ = -1;
 	//mutex_list[*mid].mutex_flag = -1;
 
-	
+	*mid = -1;
 	return 0;
 }
 
@@ -596,8 +602,6 @@ void mutex_timer()
 														task_dyn_info[mutex_list[j].owner].dyn_prio = task_dyn_info[current_tid].dyn_prio;
 														msgq_prio_change(mutex_list[j].owner, task_dyn_info[mutex_list[j].owner].dyn_prio, temp_msgq_obj_num, msgq_list, msgq_loc);
 													}
-													else
-														return -1;
 												}
 											}
 										}
@@ -620,9 +624,19 @@ void mutex_timer()
 int mutex_lock_timed(mutex_pt mid, unsigned int time)
 {
 	//API_Call_Suporter(API_mutex_lock_timed);
-	mutex_list[mid].mutex_timed_info[current_tid] = time;
+	
 	mutex_list[mid].mutex_timed_flag[current_tid] = mutex_lock(mid);
-	return 0;
+	if (mutex_list[mid].mutex_timed_flag[current_tid] == 0)
+	{
+		mutex_list[mid].mutex_timed_info[current_tid] = time;
+		return 0;//current_tid  == Blocked
+	}
+	else if (mutex_list[mid].mutex_timed_flag[current_tid] == -1)
+		return -1;//error
+	else
+		return 2;//non scheduling
+	
+
 }
 
 
@@ -636,7 +650,7 @@ int sem_create(sem_pt *sid)
 	{
 		sem_list = (Sem*)malloc((SID * 2)*sizeof(Sem));
 	}
-	else //fix later
+	else 
 	{
 		sem_list = (Sem*)realloc(sem_list, (SID * 2)*sizeof(Sem));
 	}
@@ -653,6 +667,12 @@ int sem_create(sem_pt *sid)
 		{
 			sem_list[*sid].sem_timed_info[i] = -1;
 			sem_list[*size].sem_timed_flag[i] = -1;
+			
+		}
+
+		for (int i = 0; i < WAITQ_SIZE; i++)
+		{
+			sem_list[*size].semQ[i].tid = 0;
 		}
 
 		SID++;
@@ -672,7 +692,7 @@ int sem_delete(sem_pt *sid)
 	//sem_list[*size].sem_mutex_owner = -1;
 	//sem_list[*sid].sem_flag = -1;
 
-
+	*sid = -1;
 	
 	return 0;
 	
@@ -766,9 +786,16 @@ void sem_timer()
 int sem_take_timed(sem_pt sid, int time)
 {
 	//API_Call_Suporter(API_sem_take_timed);
-	sem_list[sid].sem_timed_info[current_tid] = time+1;
 	sem_list[sid].sem_timed_flag[current_tid] = sem_take(sid);
-	return 0;
+	if (sem_list[sid].sem_timed_info[current_tid] == 0)
+	{
+		sem_list[sid].sem_timed_info[current_tid] = time;
+		return 0;
+	}
+	else if(sem_list[sid].sem_timed_info[current_tid] == -1)
+		return -1;
+	else
+		return 2;//non-scheduling
 }
 
 
@@ -808,6 +835,8 @@ int msgq_create(msgq_pt *msid, unsigned int msgsize,int maxcount)
 		msgq_list[*msid].Rear = 0;
 		msgq_list[*msid].counter = 0;
 		msgq_list[*msid].maxcounter = 0;
+		msgq_list[*msid].R = 0;
+		msgq_list[*msid].F = 0;
 
 
 		msgq_list[*msid].Message_Queue = (MQ*)calloc(maxcount, sizeof(MQ));
@@ -820,8 +849,11 @@ int msgq_create(msgq_pt *msid, unsigned int msgsize,int maxcount)
 			msgq_list[*msid].maxcounter = maxcount;
 			for (int i = 0; i < maxcount; i++)
 			{
+				msgq_list[*msid].msgqQ[i].tid = 0;
+				msgq_list[*msid].owner[i].buf = 0;
 				
 				msgq_list[*msid].Message_Queue[i].message = (char*)calloc(msgsize,sizeof(char));
+				msgq_list[*msid].Message_Queue[i].message = 0;
 				if (msgq_list[*msid].Message_Queue[i].message == NULL)
 				{
 					return -1;
@@ -893,10 +925,13 @@ int msgq_delete(msgq_pt *msid)
 	msgq_list[*msid].flag = -1;
 	msgq_list[*msid].Front = -1;
 	msgq_list[*msid].Rear = -1;
+	msgq_list[*msid].counter = -1;
 	msgq_list[*msid].maxcounter = -1;
+	msgq_list[*msid].R = -1;
+	msgq_list[*msid].F = -1;
 	
 	free(msgq_list[*msid].Message_Queue);
-
+	*msid = -1;
 	return 0;
 }
 

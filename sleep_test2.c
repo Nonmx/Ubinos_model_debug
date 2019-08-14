@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include "os.h"
 #include <assert.h>
+#include "readyQ.h"
+#include "mylib.h"
 
 extern sleepQ_init();
 int main()
 {
-	mutex_pt m1;
+	/*mutex_pt m1;
 	mutex_create(&m1);
 	task_create(1);
 	sleepQ_init();
@@ -48,7 +50,21 @@ int main()
 	printf("current_tid %d and T2 prio %d , T1 prio %d \n", current_tid, task_dyn_info[current_tid].dyn_prio, task_dyn_info[1].dyn_prio);
 	scheduler();
 	printf("current_tid %d and T2 prio %d , T1 prio %d \n", current_tid, task_dyn_info[current_tid].dyn_prio, task_dyn_info[1].dyn_prio);
+	*/
+	mutex_pt m1;
+	mutex_create(&m1);
 
+	
+
+	push_task_into_readyQ(1,2,0);
+	push_task_into_readyQ(2, 3, 0);
+	push_task_into_readyQ(3, 4, 0);
+	push_task_into_readyQ(4, 5, 0);
+
+	unsigned char tid;
+	unsigned char prio;
+	int loc = find_task_readyQ(2, 3);
+	//get_task_from_readyQ_position(&tid,&prio,);
 
 
 	/*sem_pt s1;

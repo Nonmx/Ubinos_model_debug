@@ -49,8 +49,10 @@ void semQ_sort(sem_pt sid, Sem* sem)
 		int tp_front = sem[sid].Front;
 		for (j = 0; j < (sem[sid].Rear - sem[sid].Front + WAITQ_SIZE)%WAITQ_SIZE-i; j++)
 		{
+			assert(sem[sid].semQ[tp_front + 1].tid < 10);
 			if (task_dyn_info[sem[sid].semQ[tp_front].tid].dyn_prio < task_dyn_info[sem[sid].semQ[tp_front+1].tid].dyn_prio)
 			{
+				
 				temp_tid = sem[sid].semQ[tp_front].tid;
 				//temp_prio = sem[sid].semQ[tp_front+1].prio;
 
@@ -85,7 +87,7 @@ int push_sem_task_into_WQ(unsigned char tid, unsigned char p, sem_pt sid, Sem* s
 		sem[sid].Rear = (WAITQ_SIZE + 1 + sem[sid].Rear) % WAITQ_SIZE;
 		if ((sem[sid].Rear- sem[sid].Front+WAITQ_SIZE )% WAITQ_SIZE > 1)//More than one element, sorting
 		{
-			semQ_sort(sid, sem);
+		semQ_sort(sid, sem);
 		}
 		return 0;
 	}

@@ -80,7 +80,7 @@
     <ClCompile Include="Msgq_WaitQ.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="sleep_test2.c">
+    <ClCompile Include="semQ_test.c">
       <Filter>testcase</Filter>
     </ClCompile>
   </ItemGroup>
