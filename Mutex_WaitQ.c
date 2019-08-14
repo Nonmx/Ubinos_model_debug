@@ -48,6 +48,7 @@ void mutexQ_sort(mutex_pt mid, Mutex * mutex)
 		int tp_front = mutex[mid].Front;
 		for (j = 0; j < (mutex[mid].Rear - mutex[mid].Front + WAITQ_SIZE) % WAITQ_SIZE - i; j++)
 		{
+			assert(mutex[mid].mutexQ[tp_front + 1].tid < 10);
 			if (task_dyn_info[mutex[mid].mutexQ[tp_front].tid].dyn_prio < task_dyn_info[mutex[mid].mutexQ[tp_front+1].tid].dyn_prio)
 			{
 				temp_tid = mutex[mid].mutexQ[tp_front].tid;

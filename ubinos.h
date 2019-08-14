@@ -99,7 +99,7 @@ typedef struct
 {
 	unsigned char tid;
 	//unsigned char prio;
-	int timed_flag;
+	//int timed_flag;
 }WQ;
 
 typedef struct {

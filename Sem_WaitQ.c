@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-
+extern Sem* sem_list;
 int SEM_WQ_FULL(sem_pt sid, Sem* sem)
 {
 	if ((sem[sid].Rear + 1) % WAITQ_SIZE  == sem[sid].Front)
@@ -67,6 +67,7 @@ void semQ_sort(sem_pt sid, Sem* sem)
 	}
 }
 
+
 int push_sem_task_into_WQ(unsigned char tid, unsigned char p, sem_pt sid, Sem* sem)
 {
 	task_state[tid] = Blocked;
@@ -84,6 +85,12 @@ int push_sem_task_into_WQ(unsigned char tid, unsigned char p, sem_pt sid, Sem* s
 		sem[sid].semQ[sem[sid].Rear].tid = tid;
 		task_dyn_info[sem[sid].semQ[sem[sid].Rear].tid].dyn_prio = p;
 
+
+		for (int i = 0; i < 10; i++)
+		{
+			printf("%d ", sem[sid].semQ[i].tid);
+		}
+
 		sem[sid].Rear = (WAITQ_SIZE + 1 + sem[sid].Rear) % WAITQ_SIZE;
 		if ((sem[sid].Rear- sem[sid].Front+WAITQ_SIZE )% WAITQ_SIZE > 1)//More than one element, sorting
 		{
@@ -91,7 +98,6 @@ int push_sem_task_into_WQ(unsigned char tid, unsigned char p, sem_pt sid, Sem* s
 		}
 		return 0;
 	}
-
 
 	
 

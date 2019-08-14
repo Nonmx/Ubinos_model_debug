@@ -71,7 +71,7 @@ void get_task_from_readyQ(unsigned char* t, unsigned char* p)
 	if (is_empty() && !(is_sleeping()))
 	{
 		printf("Queue is empty\n");
-		//current_tid = -1;
+		current_tid = -1;
 	}
 	else if (is_empty() && is_sleeping())
 	{

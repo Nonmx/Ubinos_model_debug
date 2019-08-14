@@ -1,13 +1,11 @@
-/*
 
-Test on basic functions of mutex
-*/
 
 #define TASK(t) TASK_##t()
 
 #include <stdio.h>
 #include "os.h"
 #include <stdlib.h>
+#include <assert.h>
 
 int task_counter[NUM_OF_TASKS];
 int flag;
@@ -33,8 +31,8 @@ msgq_pt m1;
 
 char buf[13] = "hello world";
 
-//extern int msgq_send(msgq_pt msid, char * buf);
-;
+
+
 void TASK(1)
 {
 	
@@ -51,32 +49,16 @@ L_1_0:
 L_1_1:
 	printf(" Task1 Termiante\n\n");
 	current_pc[1] = 0;
-	//printf("%s", buf);
 	flag = TerminateTask();
 	if (!flag)
 		scheduler();
 		return;
 	L_1_2:
 		;
-	/*printf("task1 sleeping\n\n");
-	current_pc[1]++;
-	flag = task_sleep(1000);
-	if (flag)
-		return;*/
 	L_1_3:
 		;
-	/*printf("time1 try locking mutex after 1000 sec\n\n");
-	current_pc[1]++;
-	//flag = mutex_lock_timed(&mutex, 1000);
-	if (flag)
-		return;*/
 	L_1_4:
 		;
-	/*printf(" Task1 Termiante\n\n");
-	current_pc[1] = 0;
-	flag = TerminateTask();
-	if (flag)
-		return;*/
 }
 
 
@@ -127,7 +109,6 @@ L_2_1:
 	return;
 L_2_2:
 	printf("Task2 Terminate\n\n");
-	//printf("%s", buf1);
 	current_pc[2] = 0;
 	printf("%s\n", buf);
 	flag = TerminateTask();
@@ -136,39 +117,14 @@ L_2_2:
 		return;
 	L_2_3:
 		;
-	/*printf("task2 unlocking mutex\n\n.");
-	current_pc[2]++;
-	flag = mutex_unlock(&mutex);
-	if (flag)
-		return;*/
 	L_2_4:
 		;
-	/*printf("task2 unlock mutex one more time\n\n.");
-	current_pc[2]++;
-	flag = mutex_unlock(&mutex);
-	if (flag)
-		return;*/
 	L_2_5:
 		;
-	/*printf("task2 lockint mutex\n\n");
-	current_pc[2]++;
-	flag = mutex_lock(&mutex);
-	if (flag)
-		return;*/
 	L_2_6:
 		;
-	/*printf("task2 unblocking mutex \n\n");
-	current_pc[2]++;
-	flag = mutex_unlock(&mutex);
-	if (flag)
-		return;*/
 	L_2_7:
 		;
-	/*printf("Task2 Terminate\n\n");
-	current_pc[2] = 0;
-	flag = TerminateTask();
-	if (flag)
-		return;*/
 }
 
 
@@ -176,7 +132,6 @@ L_2_2:
 
 void main()
 {
-	//mutex = (mutex_pt*)malloc(sizeof(mutex_pt));
 
 	msgq_create(&m1,10,10);
 
@@ -186,7 +141,6 @@ void main()
 
 	msgq_delete(&m1);
 	ShutDownOS();
-	//free(mutex);
 }
 
 int mutex_checker;
@@ -196,7 +150,7 @@ void running()
 	while (current_tid >= 0)
 	{
 
-
+		assert(!(buf1 == NULL));
 		if (current_tid == 1)
 			TASK(1);
 		else if (current_tid == 2)

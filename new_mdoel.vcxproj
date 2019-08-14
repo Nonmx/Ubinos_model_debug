@@ -143,7 +143,7 @@
     <ClCompile Include="Msgq_WaitQ.c" />
     <ClCompile Include="readyQ.c" />
     <ClCompile Include="Mutex_WaitQ.c" />
-    <ClCompile Include="semQ_test.c" />
+    <ClCompile Include="sem_test.c" />
     <ClCompile Include="Sem_WaitQ.c" />
     <ClCompile Include="Sleep_WaitQ.c" />
   </ItemGroup>

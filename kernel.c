@@ -1,4 +1,6 @@
-﻿/*
+﻿#define _CRT_SECURE_NO_WARNINGS
+
+/*
 kernel.c includes implementation of system services(APIs) of Ubinos.
 
 Author: YangSong
@@ -660,19 +662,20 @@ int sem_create(sem_pt *sid)
 	{
 		sem_list[*sid].Front = 0;
 		sem_list[*sid].Rear = 0;
-		sem_list[*size].counter = 0;
+		sem_list[*sid].counter = 0;
 		//sem_list[*size].sem_flag = -1;
 		
 		for (int i = 0; i < NUM_OF_TASKS; i++)
 		{
 			sem_list[*sid].sem_timed_info[i] = -1;
-			sem_list[*size].sem_timed_flag[i] = -1;
+			sem_list[*sid].sem_timed_flag[i] = -1;
 			
 		}
 
+		memset(sem_list[*size].semQ, 0, WAITQ_SIZE * sizeof(WQ));
 		for (int i = 0; i < WAITQ_SIZE; i++)
 		{
-			sem_list[*size].semQ[i].tid = 0;
+			sem_list[*sid].semQ[i].tid = 0;
 		}
 
 		SID++;
@@ -733,6 +736,8 @@ int sem_take(sem_pt sid)
 	{
 		API_Call_Suporter(API_sem_take);
 		push_sem_task_into_WQ(current_tid, current_prio,sid,sem_list);
+		
+		//printf("%d", sem_list[1].semQ[0].tid);
 		return 0;
 	}
 }
@@ -887,7 +892,7 @@ int msgq_send(msgq_pt msid, unsigned char *message)
 			//push_message_into_MQ(msid, message);
 			//msgq_list[msid].counter++;
 			push_task_into_readyQ(temp_tid, temp_prio, current_pc[current_tid]);
-			memcpy(msgq_list[msid].owner[temp_tid].buf, message, sizeof(message)/sizeof(char));
+			strcpy(msgq_list[msid].owner[temp_tid].buf, message);
 			return 0;
 		}
 		else
