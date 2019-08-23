@@ -110,7 +110,7 @@ L_2_1:
 L_2_2:
 	printf("Task2 Terminate\n\n");
 	current_pc[2] = 0;
-	printf("%s\n", buf);
+	printf("%s\n", buf1);
 	flag = TerminateTask();
 	if (!flag)
 		scheduler();

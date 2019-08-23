@@ -17,7 +17,7 @@ int Sleep_Empty()
 
 int Sleep_Full()
 {
-	if ((REAR + 1) % WAITQ_SIZE  == FRONT)
+	if ((REAR + 1) % (NUM_OF_TASKS+1)  == FRONT)
 		return 1;
 	else
 		return 0;
@@ -31,28 +31,28 @@ void sleepQ_sort()
 	int i = 0;
 	int j = 0;
 	
-	for (i = 0; i < (REAR - FRONT + WAITQ_SIZE)%WAITQ_SIZE; i++)
+	for (i = 0; i < (REAR - FRONT + (NUM_OF_TASKS+1))%(NUM_OF_TASKS+1); i++)
 	{
 		int tp_front = FRONT;
-		for (j = 0; j < ((REAR - FRONT+WAITQ_SIZE)%WAITQ_SIZE) - i; j++)
+		for (j = 0; j < ((REAR - FRONT+(NUM_OF_TASKS+1))%(NUM_OF_TASKS+1)) - i; j++)
 		{
 			
-				if (Sleep_Q[tp_front].time > Sleep_Q[tp_front + 1].time && Sleep_Q[tp_front+1].time != -1)
+				if (Sleep_Q[tp_front].time > Sleep_Q[(tp_front + 1)%(NUM_OF_TASKS+1)].time && Sleep_Q[(tp_front+1)%(NUM_OF_TASKS+1)].time != -1)
 				{
 					temp_tid = Sleep_Q[tp_front].tid;
 					//temp_prio = Sleep_Q[tp_front].prio;
 					temp_time = Sleep_Q[tp_front].time;
 
 
-					Sleep_Q[tp_front].tid = Sleep_Q[tp_front + 1].tid;
+					Sleep_Q[tp_front].tid = Sleep_Q[(tp_front + 1)%(NUM_OF_TASKS+1)].tid;
 					//Sleep_Q[tp_front].prio = Sleep_Q[tp_front + 1].prio;
-					Sleep_Q[tp_front].time = Sleep_Q[tp_front + 1].time;
+					Sleep_Q[tp_front].time = Sleep_Q[(tp_front + 1)%(NUM_OF_TASKS+1)].time;
 
-					Sleep_Q[tp_front + 1].tid = temp_tid;
+					Sleep_Q[(tp_front + 1)%(NUM_OF_TASKS+1)].tid = temp_tid;
 					//Sleep_Q[tp_front + 1].prio = temp_prio;
-					Sleep_Q[tp_front + 1].time = temp_time;
+					Sleep_Q[(tp_front + 1)%(NUM_OF_TASKS+1)].time = temp_time;
 				}
-				tp_front++;
+				tp_front = (tp_front + 1) % (NUM_OF_TASKS+1);
 		}
 
 	}
@@ -71,9 +71,9 @@ int push_sleep_task_into_WQ(unsigned char tid, unsigned char prio, int time)
 		Sleep_Q[REAR].tid = tid;
 		Sleep_Q[REAR].time = time;
 
-		REAR = (WAITQ_SIZE + REAR + 1) % WAITQ_SIZE;
+		REAR = (REAR + 1) % (NUM_OF_TASKS+1);
 
-		if ((REAR-FRONT + WAITQ_SIZE)%WAITQ_SIZE > 1) //If the element in the queue is greater than one
+		if ((REAR-FRONT + (NUM_OF_TASKS+1))%(NUM_OF_TASKS+1) > 1) //If the element in the queue is greater than one
 		{
 			sleepQ_sort();
 		}
@@ -87,7 +87,7 @@ int get_sleep_task_from_WQ(unsigned char* tid, unsigned char* prio)//DeQ is base
 	//	printf("mess is %s \n\n", Message_Queue->messgae);
 	if (Sleep_Empty())
 	{
-		printf("messageQ is empty\n\n");
+		printf("sleepQ is empty\n\n");
 		return -1;
 	}
 	else
@@ -97,7 +97,7 @@ int get_sleep_task_from_WQ(unsigned char* tid, unsigned char* prio)//DeQ is base
 		Sleep_Q[FRONT].time = -1;
 
 
-		FRONT = (FRONT + 1) % WAITQ_SIZE;
+		FRONT = (FRONT + 1) % (NUM_OF_TASKS+1);
 		return 0;
 	}
 }
@@ -114,7 +114,7 @@ int sleep_prio_change(unsigned char tid, unsigned char chan_prio,int loc)
 		return -1;
 }
 
-int get_sleep_task_from_WQ_position(unsigned char* tid, unsigned char* prio, int loc)
+/*int get_sleep_task_from_WQ_position(unsigned char* tid, unsigned char* prio, int loc)
 {
 	if (Sleep_Empty())
 	{
@@ -132,12 +132,12 @@ int get_sleep_task_from_WQ_position(unsigned char* tid, unsigned char* prio, int
 
 		if (FRONT == loc)
 		{
-			FRONT = (FRONT + 1) % WAITQ_SIZE;
+			FRONT = (FRONT + 1) % (NUM_OF_TASKS+1);
 		}
-		else if ((REAR+WAITQ_SIZE)%WAITQ_SIZE == 0)
+		else if ((REAR+(NUM_OF_TASKS+1))%(NUM_OF_TASKS+1) == 0)
 		{
 			sleepQ_sort();
-			REAR = WAITQ_SIZE - 1;
+			REAR = NUM_OF_TASKS;
 		}
 		else
 		{
@@ -146,5 +146,5 @@ int get_sleep_task_from_WQ_position(unsigned char* tid, unsigned char* prio, int
 		}
 	
 	}
-}
+}*/
 

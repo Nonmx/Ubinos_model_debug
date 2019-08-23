@@ -33,7 +33,8 @@ int act_counter[NUM_OF_TASKS + 1];
 int num_of_act_task = 0;
 extern void eventually(int);
 
-
+extern Mutex* mutex_list;
+extern unsigned int MID;
 void push_task_into_readyQ(unsigned char t, unsigned char p, int pc)
 {
 	if (is_full(p)) //queue  is full
@@ -43,6 +44,14 @@ void push_task_into_readyQ(unsigned char t, unsigned char p, int pc)
 	}
 	else
 	{
+		for (unsigned int i = 1; i <= MID; i++)
+		{
+			if (t == mutex_list[i].owner)
+			{
+				task_dyn_info[current_tid].In_ReadyQ  = 1;
+			}
+		}
+
 		task_state[t] = Ready;
 		k = rear[p];
 		readyQ[p][k].tid = t;
@@ -132,35 +141,35 @@ void get_task_from_readyQ_position(unsigned char* t, unsigned char* p, mutex_pt 
 
 
 		
-		temp_rear = rear[mutex[mid].owner];
+		
 
-		if (front[mutex[mid].owner] == loc)
+		if (front[task_dyn_info[mutex[mid].owner].dyn_prio] == loc)
 		{
-			front[mutex[mid].owner] = (front[mutex[mid].owner] + 1) % MAX_QUEUE_LENGTH;
+			front[task_dyn_info[mutex[mid].owner].dyn_prio] = (front[task_dyn_info[mutex[mid].owner].dyn_prio] + 1) % MAX_QUEUE_LENGTH;
 		}
-		else if((rear[mutex[mid].owner]+MAX_QUEUE_LENGTH)%MAX_QUEUE_LENGTH == 0)
+		else if((rear[task_dyn_info[mutex[mid].owner].dyn_prio]+MAX_QUEUE_LENGTH)%MAX_QUEUE_LENGTH == 0)
 		{
-			for(i = 0; i< ((rear[mutex[mid].owner] - loc + MAX_QUEUE_LENGTH)% MAX_QUEUE_LENGTH);i++)
+			for(i = 0; i< ((rear[task_dyn_info[mutex[mid].owner].dyn_prio] - loc + MAX_QUEUE_LENGTH)% MAX_QUEUE_LENGTH);i++)
 			{
-				readyQ[mutex[mid].owner][loc].activation_order = readyQ[mutex[mid].owner][loc+1].activation_order;
-				readyQ[mutex[mid].owner][loc].pc = readyQ[mutex[mid].owner][loc+1].pc;
-				readyQ[mutex[mid].owner][loc].tid = readyQ[mutex[mid].owner][loc+1].tid;
-				readyQ[mutex[mid].owner][loc].type = readyQ[mutex[mid].owner][loc+1].type;
+				readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][loc].activation_order = readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][loc+1].activation_order;
+				readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][loc].pc = readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][loc+1].pc;
+				readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][loc].tid = readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][loc+1].tid;
+				readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][loc].type = readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][loc+1].type;
 			}
 
-			rear[mutex[mid].owner] = MAX_QUEUE_LENGTH - 1;
+			rear[task_dyn_info[mutex[mid].owner].dyn_prio] = MAX_QUEUE_LENGTH - 1;
 		}
 		
 		else
 		{
-			for (i = loc; i < ((rear[mutex[mid].owner] - loc + MAX_QUEUE_LENGTH) % MAX_QUEUE_LENGTH); i++)
+			for (i = loc; i < ((rear[task_dyn_info[mutex[mid].owner].dyn_prio] - loc + MAX_QUEUE_LENGTH) % MAX_QUEUE_LENGTH); i++)
 			{
-				readyQ[mutex[mid].owner][i].activation_order = readyQ[mutex[mid].owner][i+1].activation_order;
-				readyQ[mutex[mid].owner][i].pc = readyQ[mutex[mid].owner][i+1].pc;
-				readyQ[mutex[mid].owner][i].tid = readyQ[mutex[mid].owner][i+1].tid;
-				readyQ[mutex[mid].owner][i].type = readyQ[mutex[mid].owner][i+1].type;
+				readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][i].activation_order = readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][i+1].activation_order;
+				readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][i].pc = readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][i+1].pc;
+				readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][i].tid = readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][i+1].tid;
+				readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][i].type = readyQ[task_dyn_info[mutex[mid].owner].dyn_prio][i+1].type;
 			}
-			rear[mutex[mid].owner]--;
+			rear[task_dyn_info[mutex[mid].owner].dyn_prio]--;
 		}
 
 
@@ -186,9 +195,9 @@ int scheduler() {
 
 	multi_time_checker();
 
-	if (is_idle() || api_suporter == API_TerminateTask || api_suporter == API_mutex_lock || api_suporter == API_sem_take || api_suporter == API_msgq_send || api_suporter == API_task_sleep)
+	if (is_idle() || api_name == API_TerminateTask || api_name == API_mutex_lock || api_name == API_sem_take || api_name == API_msgq_send || api_name == API_task_sleep)
 	{
-		api_suporter = -1;
+		api_name = -1;
 		get_task_from_readyQ(&current_tid, &current_prio);
 		if (current_tid == -1)
 			return -1;

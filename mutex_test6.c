@@ -57,7 +57,7 @@ L_1_2:
 	printf("t1 unlock mutex t1 prio %d \n\n",task_dyn_info[1].dyn_prio);
 	current_pc[1]++;
 	mutex_unlock(m1);
-	printf(" t1 prior $d \n\n", task_dyn_info[1].dyn_prio);
+	printf(" t1 prior %d \n\n", task_dyn_info[1].dyn_prio);
 	scheduler();
 	return;
 L_1_3:

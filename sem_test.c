@@ -1,13 +1,11 @@
 #define TASK(t) TASK_##t()
-/*
-	semphore test
-*/
+
 
 #include "os.h"
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
-//#include "readyQ.h"
+
 
 
 sem_pt sem;
@@ -51,17 +49,13 @@ L_1_0:
 		return;
 L_1_1:
 	current_pc[1] = 2;
-	//int i = 0;
-	while (i < 6)
+	while (i < 2)
 	{
 		jump_1();
 	L_1_2:
 		current_pc[1] = 3;
 		i++;
-		//num++;
 		printf("task1 has produced one\n\n");
-		//printf("task3 sem_data: %d\n\n", sem[0]
-			//.counter);
 		sem_flag[1] = sem_give(sem);
 		if (!sem_flag[1])
 			scheduler();
@@ -111,17 +105,13 @@ void TASK(2)
 	jump_2();
 L_2_0:
 	current_pc[2]++;
-	while (j < 3)
+	while (j < 1)
 	{
 		j++;
-		//printf("i am task2");
-		//printf("task2 sem_data: %d\n\n", sem[0].counter);
 		sem_flag[2] = sem_take(sem);
-		//printf("task2 sem_data: %d\n\n", sem[0].counter);
 		if (!sem_flag[2])
 			scheduler();
 		return;
-		//printf("task 2 consumes one\n\n");
 	L_2_1:
 		printf("task2 counsumes one\n\n");
 	}
@@ -157,16 +147,13 @@ void TASK(3)
 	jump_3();
 L_3_0:
 	current_pc[3]++;
-	while (l < 3)
+	while (l < 1)
 	{
 		l++;
-		//printf("task3 sem_data: %d\n\n", sem[0].counter);
 		sem_flag[3] = sem_take(sem);
-		//printf("task3 sem_data: %d\n\n", sem[0].counter);
 		if (!sem_flag[3])
 			scheduler();
 		return;
-		//printf("task 3 consumes one\n\n");
 	L_3_1:
 
 		printf("task 3 counsumes one\n\n");
@@ -188,7 +175,6 @@ L_3_3:
 
 void main()
 {
-	//sem = (sem_pt*)malloc(sizeof(sem_pt));
 
 	sem_create(&sem);
 
@@ -200,9 +186,7 @@ void main()
 
 	sem_delete(&sem);
 	ShutDownOS();
-	//assert(num == 0);
-	//system("pause");
-	//free(sem);
+
 }
 
 void running()

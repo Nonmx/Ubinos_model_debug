@@ -35,11 +35,10 @@ static __inline char is_sleeping()
 	return a > 0 ? 1 : 0;
 }
 
-static __inline char Hava_to_RR()// readyQ???? ???????? task?? ????? priority????? check
+static __inline char Hava_to_RR()
 {
 	char a = 0;
 	int i = 0;
-	//for (i = 0; i < MAX_QUEUE_LENGTH; i++)
 
 	if (task_dyn_info[readyQ[current_prio][front[current_prio]].tid].dyn_prio == current_prio)
 		return 1;
@@ -58,42 +57,36 @@ static __inline int find_task_readyQ(unsigned char tid,unsigned char prio)//find
 
 	return -1;//not found
 }
-extern int MID;
-extern int SID;
-extern int MSID;
-static __inline int find_task_mutexQ(unsigned char tid, Mutex* mutex,sem_pt *mutex_num)
+
+static __inline int find_task_mutexQ(unsigned char tid, Mutex* mutex, mutex_pt mid)
 {
-	for (int j = 1; j < MID; j++)
+	
+	for (int i = 0; i < NUM_OF_TASKS+1; i++)
 	{
-		for (int i = 0; i < WAITQ_SIZE; i++)
-		{
-			if (mutex[j].mutexQ[i].tid == tid)
-				* mutex_num = j;
-				return i;
-		}
+		if (mutex[mid].mutexQ[i].tid == tid)
+			return i;
 	}
+	
 
 	return -1;//not found
 }
 
-static __inline int find_task_semQ(unsigned char tid, Sem* sem,sem_pt *sem_num)
+static __inline int find_task_semQ(unsigned char tid, Sem* sem,sem_pt sid)
 {
-	for (int j = 1; j < SID; j++)
+	
+	for (int i = 0; i < NUM_OF_TASKS+1; i++)
 	{
-		for (int i = 0; i < WAITQ_SIZE; i++)
-		{
-			if (sem[j].semQ[i].tid == tid)
-				* sem_num = j;
-				return i;
-		}
+		if (sem[sid].semQ[i].tid == tid)
+			return i;
 	}
+	
 
 	return -1;//not found
 }
 
 static __inline int find_task_sleepQ(unsigned char tid)
 {
-	for (int i = 0; i < WAITQ_SIZE; i++)
+	for (int i = 0; i < NUM_OF_TASKS+1; i++)
 	{
 		if (Sleep_Q[i].tid== tid)
 			return i;
@@ -102,18 +95,15 @@ static __inline int find_task_sleepQ(unsigned char tid)
 	return -1;//not found
 }
 
-static __inline int find_task_msgqWQ(unsigned char tid, Msgq* msgq, msgq_pt *msgq_num)
+static __inline int find_task_msgqWQ(unsigned char tid, Msgq* msgq, msgq_pt msid)
 {
-	for (int j = 1; j < MSID; j++)
+	
+	for (int i = 0; i < NUM_OF_TASKS+1; i++)
 	{
-		for (int i = 0; i < WAITQ_SIZE; i++)
-		{
-			if (msgq[j].msgqQ[i].tid == tid)
-				* msgq_num = j;
-			return i;
-		}
+		if (msgq[msid].msgqQ[i].tid == tid)
+		return i;
 	}
-	return -1;
+
 }
 
 /*static __inline int Find_Btask(int *pri_loc, int *task_loc, OWNER owner)

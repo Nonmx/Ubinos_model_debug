@@ -7,7 +7,8 @@ author: yangsong
 #define UBINOS_H_
 
 /* get configuration from config.h file */
-#include "config.h" //config ??
+#include "config.h"
+#include <stdio.h>
 //#include <windows.h>
 /* define ERROR codes -- from OSEK/VDX OS specification */
 #define E_OK 0
@@ -51,7 +52,7 @@ typedef enum API {
 
 
 extern API api;
-extern API api_suporter;
+extern API api_name;
 
 typedef enum Mess {
 	PB_KEY_CHANGE_EVT,
@@ -87,43 +88,56 @@ typedef struct
 }task_static_config;
 
 /* DS to store dynamic state information */
+
+
+typedef struct {
+	char* buf;
+}Task_buf;
+
+
 typedef struct {
 	unsigned char act_cnt;
 	unsigned char dyn_prio;
 	unsigned char preemptable;
+	unsigned int In_ReadyQ;
+	unsigned int In_MutexQ;
+	unsigned int Mutex_Id;
+	unsigned int In_SemQ;
+	unsigned int Sem_Id;
+	unsigned int In_MsgqQ;
+	unsigned int Msgq_Id;
+	unsigned int In_SleepQ;
+
+	Task_buf task_message[NUM_OF_TASKS];
+
+
 }task_dynamic_stat;
 
-#define WAITQ_SIZE 15
 
 typedef struct
 {
 	unsigned char tid;
-	//unsigned char prio;
-	//int timed_flag;
 }WQ;
 
 typedef struct {
 	int flag;// -1 = mutex 없다, 0 = unlocked, 1 = locked
 	char owner;//locked 가지고 있는  task
 	int lock_counter;
-	int lock_call[NUM_OF_TASKS];
-	int tra_flag;
+	int lock_call[NUM_OF_TASKS+1];
+	int prio_inheri;
 	int signal;
 	int block_flag;
 	int timed_flag;
-	int form_readyQ;
-	int form_sleepQ;
-	int form_semQ;
-	int form_mutexQ;
-	int form_msgqQ;
+
 	int mutex_timed_info[NUM_OF_TASKS+1];
 	int mutex_timed_flag[NUM_OF_TASKS+1];
 
 	//mutex waitQ
 	int Front;
 	int Rear;
-	WQ mutexQ[WAITQ_SIZE + 1];
+	WQ mutexQ[NUM_OF_TASKS+1];
 }Mutex;
+
 
 
 typedef int mutex_pt;
@@ -139,42 +153,32 @@ typedef struct {
 
 	int Front;
 	int Rear;
-	WQ semQ[WAITQ_SIZE + 1];
+	WQ semQ[NUM_OF_TASKS+1];
 
 }Sem;
 typedef int sem_pt;
 
-#define messageQ_SIZE 25
 
 typedef struct {
 	unsigned char *message;
 }MQ;
-/*typedef struct
-{
-	unsigned char* message;
-}message;*/
+
 
 
 typedef struct {
-	char* buf;
-}OWN;
-
-typedef struct {
-	int flag;
 	int maxcounter;
 	int counter;
 	int msgsize;
-	OWN owner[NUM_OF_TASKS];
-	//char* buf;
+	
 	int Front;
 	int Rear;
-	WQ msgqQ[WAITQ_SIZE];
+	WQ msgqQ[NUM_OF_TASKS+1];
 	
 
 	int F;
 	int R;
-	//message MESSAGE[NUM_OF_TASKS];
 	MQ *Message_Queue;
+	
 }Msgq;
 
 
@@ -188,7 +192,7 @@ typedef struct
 	int time;
 }SLEEP;
 
-SLEEP Sleep_Q[WAITQ_SIZE];
+SLEEP Sleep_Q[NUM_OF_TASKS+1];
 
 /*typedef struct{
 	unsigned char prio;

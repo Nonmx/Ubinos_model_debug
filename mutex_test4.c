@@ -79,7 +79,7 @@ void TASK(2)
 L_2_0:
 	printf("task2 locking mutex\n\n");
 	current_pc[2]++;
-	flag = mutex_lock(&mutex);
+	flag = mutex_lock(mutex);
 	if (!flag)
 		scheduler();
 	return;
@@ -94,7 +94,7 @@ L_2_1:
 L_2_2:
 	printf("task2 unlocking mutex\n\n");
 	current_pc[2]++;
-	flag = mutex_unlock(&mutex);
+	flag = mutex_unlock(mutex);
 	if (!flag)
 		scheduler();
 	return;
@@ -126,14 +126,14 @@ void TASK(3)
 L_3_0:
 	printf("task3 try to locking mutex\n\n");
 	current_pc[3]++;
-	flag = mutex_lock(&mutex);
+	flag = mutex_lock(mutex);
 	if (!flag)
 		scheduler();
 	return;
 L_3_1:
 	printf("task3 unlock the mutex\n\n");
 	current_pc[3]++;
-	flag = mutex_unlock(&mutex);
+	flag = mutex_unlock(mutex);
 	if (!flag)
 		scheduler();
 	return;
